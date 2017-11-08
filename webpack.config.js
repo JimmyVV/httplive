@@ -5,12 +5,16 @@ const COMPILE = (process.env.NODE_ENV === 'compile');
 
 let config = {
     devtool: 'inline-source-map',
+    context:path.join(__dirname),
     entry: {
-        index: path.join(__dirname, 'src/index')
+        index: path.join(__dirname, 'test')
     },
     output: {
         path: path.join(__dirname, 'dist'),
         filename: '[name].js'
+    },
+    resolve:{
+        modules:[path.resolve(__dirname),path.resolve(__dirname,'node_modules')]
     },
     module: {
         rules: [{
