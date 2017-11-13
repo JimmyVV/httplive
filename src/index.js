@@ -1,6 +1,0 @@
-
-class HTTPFLV{
-    constructor(config){
-        
-    }
-}
