@@ -1,11 +1,13 @@
 const path = require('path');
+const webpack = require('webpack');
+const Uglifyjs = require('uglifyjs-webpack-plugin');
 
 
 const COMPILE = (process.env.NODE_ENV === 'compile');
 
 let config = {
     devtool: 'inline-source-map',
-    context:path.join(__dirname),
+    context: path.join(__dirname),
     entry: {
         index: path.join(__dirname, 'test')
     },
@@ -13,8 +15,8 @@ let config = {
         path: path.join(__dirname, 'dist'),
         filename: '[name].js'
     },
-    resolve:{
-        modules:[path.resolve(__dirname),path.resolve(__dirname,'node_modules')]
+    resolve: {
+        modules: [path.resolve(__dirname), path.resolve(__dirname, 'node_modules')]
     },
     module: {
         rules: [{
@@ -27,8 +29,17 @@ let config = {
                 }
             }]
         }]
-    }
+    },
+    plugins: []
+}
 
+if (COMPILE) {
+    config.plugins.push(new Uglifyjs({
+        compress: {
+            warnings: true,
+            pure_funcs:['console.log']
+        }
+    }));
 }
 
 
