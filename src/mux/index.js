@@ -14,6 +14,7 @@ export default class MuxController{
     }
     parse(chunkArray,type="MS"){
         this._flvDemux.parse(chunkArray);
+        
         let buffer;
         if(type === "IS"){
             buffer = this._mp4Remux.generateIS();

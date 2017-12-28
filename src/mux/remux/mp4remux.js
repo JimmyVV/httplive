@@ -14,6 +14,8 @@ export default class MP4Remux {
         this._mediaInfo = mediaInfo;
 
         this._seq = 0;
+        this._lastTimeStamp;
+        this._lastDuration;
     }
     generateIS() {
         let {
@@ -43,6 +45,104 @@ export default class MP4Remux {
         return mergeTypedArray(audioMS);
 
     }
+
+    _remuxVideoMdat() {
+        let videoMdat = MP4.mdat(this._videoTrack.length);
+
+        let offset = 8,
+            track = this._videoTrack,
+            meta = track.meta,
+            samples = track.samples,
+            mp4Samples = [];
+
+        let baseDts = samples[0].dts;
+
+        let lastPreciseDuration,tagDuration,deltaCorrect,tmpTime;
+
+        console.log(this._videoTrack);
+        console.log(this._audioTrack);
+
+        samples.forEach((viSample, index) => {
+            let dts = viSample.dts,
+                cts = viSample.cts,
+                pts = dts + cts;
+
+
+            let sampleSize = viSample.slices.byteLength;
+            
+            videoMdat.set(viSample.slices, offset);
+
+            
+
+            let keyFrame = viSample.keyFrame;
+
+            if(this._lastTimeStamp){
+                tagDuration = meta.refSampleDuration;
+                this._lastDuration = tagDuration;
+                this._lastTimeStamp = viSample.timeStamp;
+            }else{
+                if(samples[index+1] && index !==0 ){
+                    // not first tag
+                    tagDuration = samples[index + 1].timeStamp - viSample.timeStamp;
+                }else{
+                    // the first tag or only one tag or the last tag
+
+                    if(samples.length > 1 && index !== (samples.length - 1) ){
+                        // the first Tag
+                        tmpTime = samples[1].timeStamp - samples[0].timeStamp;
+                    }else{
+                        // only one tag or the last tag
+                        tmpTime = this._lastDuration;
+                    }
+                    // the firs tag or only tag
+                    lastPreciseDuration = viSample - this._lastTimeStamp;
+                    deltaCorrect = lastPreciseDuration - this._lastDuration;
+                    tagDuration = tmpTime + deltaCorrect;
+
+                    this._lastDuration = tagDuration;
+                    this._lastTimeStamp = viSample.timeStamp;
+                }
+
+
+            }
+
+            meta.duration += tagDuration;
+
+            mp4Samples.push({
+                dts,
+                pts,
+                cts,
+                length: viSample.length,
+                keyFrame,
+                sampleSize,
+                duration: tagDuration,
+                chunkOffset: offset,
+                flags: {
+                    isLeading: 0,
+                    dependsOn: keyFrame ?
+                        2 : 1, // an I picture : not I picture
+                    isDepended: keyFrame ?
+                        1 : 0, //  unknown dependent sample: not disposable
+                    hasRedundancy: 0, // for sdtp
+                    isNonSync: keyFrame ?
+                        0 : 1
+                }
+            })
+
+
+            offset += viSample.length;
+        });
+        console.log(mp4Samples);
+
+        track.samples = mp4Samples;
+        this._seq++;
+
+        return {
+            videoMdat,
+            baseDts
+        }
+
+    }
     
     _remuxAudio(){
         let {
@@ -53,7 +153,7 @@ export default class MP4Remux {
 
         return mergeTypedArray(moof,audioMdat);
     }
-    
+
     _remuxVideo() {
         let {
             videoMdat,
@@ -115,68 +215,5 @@ export default class MP4Remux {
 
     }
    
-    _remuxVideoMdat() {
-        let videoMdat = MP4.mdat(this._videoTrack.length);
-
-        let offset = 8,
-            track = this._videoTrack,
-            meta = track.meta,
-            refDuration = meta.refSampleDuration,
-            samples = track.samples,
-            mp4Samples = [];
-
-        let baseDts = samples[0].dts;
-
-        console.log(this._videoTrack);
-        console.log(this._audioTrack);
-
-        samples.forEach((viSample, index) => {
-            let dts = viSample.dts,
-                cts = viSample.cts,
-                pts = dts + cts;
-
-
-            let sampleSize = viSample.slices.byteLength;
-            
-            videoMdat.set(viSample.slices, offset);
-
-            meta.duration += refDuration;
-
-            let keyFrame = viSample.keyFrame;
-
-            mp4Samples.push({
-                dts,
-                pts,
-                cts,
-                length: viSample.length,
-                keyFrame,
-                sampleSize,
-                duration: refDuration,
-                chunkOffset: offset,
-                flags: {
-                    isLeading: 0,
-                    dependsOn: keyFrame ?
-                        2 : 1, // an I picture : not I picture
-                    isDepended: keyFrame ?
-                        1 : 0, //  unknown dependent sample: not disposable
-                    hasRedundancy: 0, // for sdtp
-                    isNonSync: keyFrame ?
-                        0 : 1
-                }
-            })
-
-
-            offset += viSample.length;
-        });
-        console.log(mp4Samples);
-
-        track.samples = mp4Samples;
-        this._seq++;
-
-        return {
-            videoMdat,
-            baseDts
-        }
-
-    }
+   
 }

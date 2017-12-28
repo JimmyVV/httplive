@@ -109,9 +109,8 @@ export default class AVCDemux {
                 slices,
                 length:offset,
                 keyFrame,
-                dts,
+                timeStamp,
                 cts,
-                pts: (dts + cts)
             });
             this._videoTrack.length += offset;
         }
