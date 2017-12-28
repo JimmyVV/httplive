@@ -53,6 +53,7 @@ export default class MP4Remux {
 
         return mergeTypedArray(moof,audioMdat);
     }
+    
     _remuxVideo() {
         let {
             videoMdat,
