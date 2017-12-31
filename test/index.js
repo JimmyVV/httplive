@@ -3,7 +3,7 @@ import MuxController from '../src/mux';
 import {downfile,download,downFLV} from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_98ad430ba390a2caafe5951250cbc67d.flv');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_2d77594951b1679c2940eb7feaa05d37.flv');
 let muxController = new MuxController();
 
 /**
