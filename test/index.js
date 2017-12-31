@@ -1,10 +1,13 @@
 import HTTPChunked from '../src/httpflv/src';
 import MuxController from '../src/mux';
-import {downfile,download,downFLV} from 'debug/helper';
+import MSE from '../src/MSE/mseControl';
+import {downfile,download,downFLV,concatBuffer} from 'debug/helper';
 
 
 let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_2d77594951b1679c2940eb7feaa05d37.flv');
 let muxController = new MuxController();
+
+let mse = new MSE(document.getElementById('videoTag'));
 
 /**
  * Drop TestCase
@@ -33,12 +36,29 @@ let muxController = new MuxController();
  * Stream Event TestCase
  */
 
+ let sourceBuffer;
+
+
  httpChunked.bind('stream',(stream,type)=>{
 
-        // downFLV(stream,'video');
-        muxController.parse(stream,type);
-    
-    
+        if(type === 'IS'){
+          let {buffer,mime} = muxController.parse(stream,type);
+
+          mse.addSourceBuffer(mime)
+          .then(sb=>{
+            sourceBuffer = sb;
+            sourceBuffer.appendBuffer(buffer);
+          })
+        }else{
+          let {buffer} = muxController.parse(stream,type);
+          
+          if(buffer){
+            
+            sourceBuffer.appendBuffer(buffer);
+          }
+
+          
+        }
     
 
  })

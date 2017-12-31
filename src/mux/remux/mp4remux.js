@@ -16,6 +16,8 @@ export default class MP4Remux {
         this._seq = 0;
         this._lastTimeStamp;
         this._lastDuration;
+
+        this._timebase = 0;
     }
     generateIS() {
         let {
@@ -26,11 +28,12 @@ export default class MP4Remux {
             return MP4.initBox(this._videoTrack.meta, this._audioTrack.meta);
         }
     }
-    generateMS() {
+    generateMS(lastTimeStamp) {
         let videoMS = new Uint8Array(0),
             audioMS = new Uint8Array(0);
 
         if(this._videoTrack.samples.length){
+            this._lastTimeStamp = lastTimeStamp;
             videoMS = this._remuxVideo();
         }
 
@@ -42,7 +45,7 @@ export default class MP4Remux {
         this._audioTrack.samples = [];
         this._videoTrack.length = this._audioTrack.length = 0;
 
-        return mergeTypedArray(audioMS);
+        return mergeTypedArray(videoMS,audioMS);
 
     }
 
@@ -55,56 +58,33 @@ export default class MP4Remux {
             samples = track.samples,
             mp4Samples = [];
 
-        let baseDts = samples[0].dts;
+        let baseDts = this._timebase;
 
         let lastPreciseDuration,tagDuration,deltaCorrect,tmpTime;
 
-        console.log(this._videoTrack);
-        console.log(this._audioTrack);
-
+    
         samples.forEach((viSample, index) => {
-            let dts = viSample.dts,
-                cts = viSample.cts,
-                pts = dts + cts;
-
-
+            let cts = viSample.cts,
+                dts,pts;
+                
             let sampleSize = viSample.slices.byteLength;
-            
-            videoMdat.set(viSample.slices, offset);
 
-            
+
+            videoMdat.set(viSample.slices, offset);
 
             let keyFrame = viSample.keyFrame;
 
-            if(this._lastTimeStamp){
-                tagDuration = meta.refSampleDuration;
-                this._lastDuration = tagDuration;
-                this._lastTimeStamp = viSample.timeStamp;
+            if(samples.length > 1 && samples.length !== index+1){
+                // loop the samples but not the last one
+                tagDuration = samples[index+1].timeStamp - viSample.timeStamp;
             }else{
-                if(samples[index+1] && index !==0 ){
-                    // not first tag
-                    tagDuration = samples[index + 1].timeStamp - viSample.timeStamp;
-                }else{
-                    // the first tag or only one tag or the last tag
-
-                    if(samples.length > 1 && index !== (samples.length - 1) ){
-                        // the first Tag
-                        tmpTime = samples[1].timeStamp - samples[0].timeStamp;
-                    }else{
-                        // only one tag or the last tag
-                        tmpTime = this._lastDuration;
-                    }
-                    // the firs tag or only tag
-                    lastPreciseDuration = viSample - this._lastTimeStamp;
-                    deltaCorrect = lastPreciseDuration - this._lastDuration;
-                    tagDuration = tmpTime + deltaCorrect;
-
-                    this._lastDuration = tagDuration;
-                    this._lastTimeStamp = viSample.timeStamp;
-                }
-
-
+                tagDuration = this._lastTimeStamp - viSample.timeStamp;
             }
+
+            this._timebase += tagDuration;
+
+            dts = this._timebase;
+            pts = dts + cts;
 
             meta.duration += tagDuration;
 
@@ -127,8 +107,7 @@ export default class MP4Remux {
                     isNonSync: keyFrame ?
                         0 : 1
                 }
-            })
-
+            });
 
             offset += viSample.length;
         });

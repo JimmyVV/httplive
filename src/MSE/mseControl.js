@@ -1,16 +1,16 @@
-import SourceBuffer from './sourceBufferControl';
+import SourceBuffer from './lib/sourceBufferControl';
 import Log from 'lib/log';
 
 let log = new Log('MSEControl');
 
-class MSEControl {
-    constructor() {
+export default class MSEControl {
+    constructor(video) {
         this._ms = new MediaSource();
-
+        this._video = video;
         this._SUPPORT = this._detect();
         this._sbList = [];
 
-
+        this._video.src = URL.createObjectURL(this._ms);
 
         this._ms.addEventListener('sourceopen', this._msOpenEvent.bind(this), false);
         this._ms.addEventListener('sourceended', this._msEndEvent.bind(this), false);

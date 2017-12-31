@@ -1,5 +1,6 @@
 import Log from 'lib/log';
-import {mergeBuffer} from 'lib/utils';
+import {mergeUnit8Array} from 'lib/utils';
+import {downfile,concatBuffer} from 'debug/helper';
 
 let log = new Log('SourceBufferControl');
 
@@ -20,10 +21,17 @@ class SourceBufferControl {
         this._tmpBuffer = [];
 
         sourceBuffer.addEventListener('update',()=>{},false);
-
+        sourceBuffer.addEventListener('updateend',this._updateEndHandler.bind(this),false);
 
     }
+    _updateEndHandler(){
+        // append rest buffer
+        if(this._tmpBuffer.length && !this._sb.updating){
 
+            this._sb.appendBuffer(mergeUnit8Array(this._tmpBuffer));
+            this._tmpBuffer = [];
+        }
+    }
     _releaseMemory() {
         let {release, time} = this._memory;
 
@@ -97,12 +105,18 @@ class SourceBufferControl {
         })
     }
     appendBuffer(buffer){
+        concatBuffer(buffer,1024*200);
+        this._tmpBuffer.push(buffer)
 
-      
+        if(!this._sb.updating){
 
+            this._sb.appendBuffer(mergeUnit8Array(this._tmpBuffer));
+            
+            this._tmpBuffer = [];
+        }
     }
 
-}
+} 
 
 
 
