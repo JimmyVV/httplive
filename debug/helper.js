@@ -108,7 +108,7 @@ exports.stop = (function(){
 	let num = 0;
 
 	return function(limit){
-		console.log(num);
+
 		return limit <= num++;
 	}
 

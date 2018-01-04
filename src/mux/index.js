@@ -21,12 +21,15 @@ export default class MuxController {
     parse(chunkArray, type = "MS") {
         this._flvDemux.parse(chunkArray);
 
-        let buffer = new Uint8Array(0);
-
         if (type === "IS") {
+            let {videoIS,
+                audioIS} = this._mp4Remux.generateIS();
+
             return {
-                buffer: this._mp4Remux.generateIS() ||  buffer,
-                mime: this._flvDemux.MIME
+                videoIS,
+                audioIS,
+                videoMime:this._flvDemux.videoMIME,
+                audioMime:this._flvDemux.audioMIME
             }
         } else {
             // cache at least 2 video tags
@@ -34,20 +37,23 @@ export default class MuxController {
                 
                 this._lastVideoSample = this._videoTrack.samples.pop();
                 this._videoTrack.length -= this._lastVideoSample.length;
-
-                buffer = this._mp4Remux.generateMS(this._lastVideoSample.timeStamp) || buffer;
                 
-                
+                let {audioMS,videoMS} = this._mp4Remux.generateMS(this._lastVideoSample.timeStamp);
+             
                 this._videoTrack.samples = [this._lastVideoSample];
                 this._videoTrack.length = this._lastVideoSample.length;
                 this._audioTrack.samples = [];
                 this._audioTrack.length = 0;
+
+
+                return {
+                    audioMS,videoMS
+                }
+    
             }
 
-            return {
-                buffer
-            }
-
+            return {};
+ 
         }
 
 

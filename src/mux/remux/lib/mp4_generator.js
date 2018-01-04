@@ -340,13 +340,15 @@ MP4.initBox = function (meta1,meta2) {
 	return buffer;
 }
 
+
+
 MP4.fmoov = function (meta1,meta2) {
 	let mvhd = MP4.mvhd(meta1.timescale, meta1.duration);
 	if(meta2){
 		return MP4.box(MP4.types.moov,mvhd,MP4.trak(meta1),MP4.trak(meta2), MP4.mvex(1,2))
 	}
 
-	return MP4.box(MP4.types.moov,mvhd,MP4.trak(meta1), MP4.mvex(1))
+	return MP4.box(MP4.types.moov,mvhd,MP4.trak(meta1), MP4.mvex(meta1.id))
 
 
 	// return MP4.box(MP4.types.moov, mvhd, trak, mvex);

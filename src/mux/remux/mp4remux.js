@@ -13,7 +13,8 @@ export default class MP4Remux {
         this._videoTrack = videoTrack;
         this._mediaInfo = mediaInfo;
 
-        this._seq = 0;
+        this._videoSeq = 0;
+        this._audioSeg = 0;
         this._lastTimeStamp;
         this._lastDuration;
 
@@ -25,7 +26,10 @@ export default class MP4Remux {
             hasAudio
         } = this._mediaInfo;
         if (hasVideo && hasAudio) {
-            return MP4.initBox(this._videoTrack.meta, this._audioTrack.meta);
+            return {
+                videoIS:MP4.initBox(this._videoTrack.meta),
+                audioIS:MP4.initBox(this._audioTrack.meta)
+            };
         }
     }
     generateMS(lastTimeStamp) {
@@ -41,11 +45,11 @@ export default class MP4Remux {
             audioMS = this._remuxAudio();
         }
 
-        this._videoTrack.samples = [];
-        this._audioTrack.samples = [];
-        this._videoTrack.length = this._audioTrack.length = 0;
 
-        return mergeTypedArray(videoMS,audioMS);
+        return {
+            audioMS,
+            videoMS
+        }
 
     }
 
@@ -111,10 +115,10 @@ export default class MP4Remux {
 
             offset += viSample.length;
         });
-        console.log(mp4Samples);
+
 
         track.samples = mp4Samples;
-        this._seq++;
+        this._videoSeq++;
 
         return {
             videoMdat,
@@ -128,7 +132,7 @@ export default class MP4Remux {
             audioMdat,baseDts
         } = this._remuxAudioMdat();
 
-        let moof = MP4.moof(this._audioTrack,baseDts,this._seq);
+        let moof = MP4.moof(this._audioTrack,baseDts,this._audioSeg);
 
         return mergeTypedArray(moof,audioMdat);
     }
@@ -139,7 +143,7 @@ export default class MP4Remux {
             baseDts
         } = this._remuxVideoMdat();
 
-        let moof = MP4.moof(this._videoTrack, baseDts, this._seq);
+        let moof = MP4.moof(this._videoTrack, baseDts, this._videoSeq);
 
 
         return mergeTypedArray(moof, videoMdat);
@@ -185,7 +189,7 @@ export default class MP4Remux {
         });
 
         track.samples = mp4Samples;
-        this._seq++;
+        this._audioSeg++;
 
         return {
             baseDts,

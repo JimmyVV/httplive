@@ -79,6 +79,6 @@ export default class TrackInfo {
         return 'video/mp4; codecs="' + this._videoTrack.meta.codec + '"';
     }
     get audioMIME(){
-        return 'video/mp4; codecs="' + this._audioTrack.meta.codec + '"';
+        return 'audio/mp4; codecs="' + this._audioTrack.meta.codec + '"';
     }
 }

@@ -1,10 +1,15 @@
 import HTTPChunked from '../src/httpflv/src';
 import MuxController from '../src/mux';
 import MSE from '../src/MSE/mseControl';
-import {downfile,download,downFLV,concatBuffer} from 'debug/helper';
+import {
+  downfile,
+  download,
+  downFLV,
+  concatBuffer
+} from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_2d77594951b1679c2940eb7feaa05d37.flv');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_60339f7cb6260b648d5e1068d22a7d72.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
@@ -36,37 +41,46 @@ let mse = new MSE(document.getElementById('videoTag'));
  * Stream Event TestCase
  */
 
- let sourceBuffer;
+let v_SB,a_SB;
 
 
- httpChunked.bind('stream',(stream,type)=>{
+httpChunked.bind('stream', (stream, type) => {
 
-        if(type === 'IS'){
-          let {buffer,mime} = muxController.parse(stream,type);
+  if (type === 'IS') {
+    let {
+      videoIS,
+      audioIS,
+      videoMime,
+      audioMime
+    } = muxController.parse(stream, type);
 
-          mse.addSourceBuffer(mime)
-          .then(sb=>{
-            sourceBuffer = sb;
-            sourceBuffer.appendBuffer(buffer);
-          })
-        }else{
-          let {buffer} = muxController.parse(stream,type);
-          
-          if(buffer){
-            
-            sourceBuffer.appendBuffer(buffer);
-          }
-
-          
-        }
+    v_SB = mse._addSourceBuffer(videoMime);
+    a_SB = mse._addSourceBuffer(audioMime);
     
+    // concatBuffer(videoIS,100*1024);
+    v_SB.appendBuffer(videoIS);
+    a_SB.appendBuffer(audioIS);
 
- })
+  } else {
+    let {
+      audioMS,videoMS
+    } = muxController.parse(stream, type);
 
 
- /**
-  * End Event TestCase
-  */
+    audioMS && a_SB.appendBuffer(audioMS);
+    videoMS && v_SB.appendBuffer(videoMS);
+
+    // videoMS && concatBuffer(videoMS,15000*1024);
+    document.getElementById('videoTag').play();
+  }
+
+
+})
+
+
+/**
+ * End Event TestCase
+ */
 
 // TODO 
 // 1. bind

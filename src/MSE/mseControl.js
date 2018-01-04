@@ -54,6 +54,16 @@ export default class MSEControl {
             })
 
     }
+    _addSourceBuffer(mime){
+        if (!MediaSource.isTypeSupported(mime))
+        log.e("MSE don't support this mimeType, ", mime);
+
+        let sb = new SourceBuffer(this._ms, this._ms.addSourceBuffer(mime))
+
+        this._sbList.push(sb);
+
+        return sb;
+    }
     /**
      * @return {Promise} when the ms become open then trigger
      */

@@ -5,10 +5,16 @@ import {
     CHUNKEDEND,
     CHUNKEDERR
 } from 'lib/constants';
-import {mergeBuffer} from 'lib/utils';
+import {
+    mergeBuffer
+} from 'lib/utils';
 import HeaderRead from '../lib/header';
-import { debug } from 'util';
-import {stop} from 'debug/helper';
+import {
+    debug
+} from 'util';
+import {
+    stop
+} from 'debug/helper';
 
 class HTTPChunked extends HeaderRead {
     constructor(url = '') {
@@ -20,7 +26,7 @@ class HTTPChunked extends HeaderRead {
 
         this._emitter = Mitt();
         this._url = url;
-        this._CALCEL = false;
+        this._CANCEL = false;
         this._ERROR = false;
         this._chunk = new ArrayBuffer(0);
 
@@ -47,7 +53,7 @@ class HTTPChunked extends HeaderRead {
                     // TODO 
                     // 1. when use deicide to drop the url
                     // 2. when developer wanna switch to another url
-                    if (this._CALCEL) {
+                    if (this._CANCEL) {
                         // the user drop this video
                         if (!done) {
                             try {
@@ -75,15 +81,15 @@ class HTTPChunked extends HeaderRead {
 
 
                     console.log('every segment len is ', value.length);
-                   
+
                     // this._emit(CHUNKEDSTREAM, value); // trigger the reade stream
-                   
+
                     this.readChunk(value.buffer);
 
-                    if(stop(500)){
+                    if (stop(500)) {
                         this.drop(); // TODO debugger
                     }
-                    
+
                     return reader.read().then(chunkedReader.bind(this));
                 }.bind(this))
             })
@@ -96,41 +102,41 @@ class HTTPChunked extends HeaderRead {
             })
     }
     // extract the tag data
-        // reader body
-        // reader Tag
-        //  script
-        //  video
-        //  audio
+    // reader body
+    // reader Tag
+    //  script
+    //  video
+    //  audio
     readChunk(chunk) {
         // reder FLV header
-        this._chunk = mergeBuffer(this._chunk,chunk);
+        this._chunk = mergeBuffer(this._chunk, chunk);
 
-        let tmpData,ab,view;
+        let tmpData, ab, view;
 
         this._bufferLen = this._chunk.byteLength;
         this._readLen = 0;
         this._returnArr = [];
-        
-        let type = 'MS';
-        
 
-        while(this._bufferLen - this._readLen > 11){
-            
-            
+        let type = 'MS';
+
+
+        while (this._bufferLen - this._readLen > 11) {
+
+
             ab = new Uint8Array(this._chunk);
 
 
             // reader FLV File Header
             if (ab[0] === 0x46 && ab[1] === 0x4C && ab[2] === 0x56) {
-                
+
                 // reader FLV header
-                tmpData = this._flvHeader(this._chunk.slice(0,9));
+                tmpData = this._flvHeader(this._chunk.slice(0, 9));
 
                 this._returnArr.push({
-                    buffer:tmpData.buffer,
-                    info:{
-                        type:tmpData.type,
-                        version:tmpData.version,
+                    buffer: tmpData.buffer,
+                    info: {
+                        type: tmpData.type,
+                        version: tmpData.version,
                         tagOffset: tmpData.tagOffset,
                         hasAudio: tmpData.hasAudio,
                         hasVideo: tmpData.hasVideo,
@@ -149,13 +155,13 @@ class HTTPChunked extends HeaderRead {
 
             // get the previous tag size
             let prvDataSize = view.getUint32(0);
-            
+
 
             let dataSize = view.getUint32(4) & 16777215;
 
             console.log(dataSize);
-            
-            if(this._bufferLen - this._readLen < 11 + dataSize){
+
+            if (this._bufferLen - this._readLen < 11 + dataSize) {
                 // when the remained data is not a complete tag, return;
                 break;
             }
@@ -163,34 +169,34 @@ class HTTPChunked extends HeaderRead {
             // decode Flv tag
             tmpData = this._flvTag(this._chunk.slice(4));
 
-            
+
             this._returnArr.push({
-                buffer:tmpData.buffer,
-                info:{
-                    type:tmpData.type,
-                    dataOffset:tmpData.dataOffset,
-                    dataSize:tmpData.dataSize,
-                    timeStamp:tmpData.timeStamp,
-                    tagLen:tmpData.tagLen
+                buffer: tmpData.buffer,
+                info: {
+                    type: tmpData.type,
+                    dataOffset: tmpData.dataOffset,
+                    dataSize: tmpData.dataSize,
+                    timeStamp: tmpData.timeStamp,
+                    tagLen: tmpData.tagLen
                 }
             });
 
             this._chunk = this._chunk.slice(tmpData.tagLen + 4); // prvTag size
             this._readLen += tmpData.tagLen + 4;
- 
+
         }
 
         // detect the arr is empty, then don't return
-        if(!this._returnArr.length) return;
+        if (!this._returnArr.length) return;
 
         /**
          * the type contain IS/MS:
          *      IS: initial Segment
          *      MS: media Segment
          */
-        this._emit(CHUNKEDSTREAM, this._returnArr,type);
+        this._emit(CHUNKEDSTREAM, this._returnArr, type);
 
-        
+
     }
 
     /**
@@ -226,11 +232,11 @@ class HTTPChunked extends HeaderRead {
      *  2. when start a new fetch, reset the cancal's state
      */
     _start() {
-        this._CALCEL = false;
+        this._CANCEL = false;
         this._ERROR = false;
     }
     drop() {
-        this._CALCEL = true;
+        this._CANCEL = true;
 
         return new Promise((res, rej) => {
             this._on(HTTPCANCEL, () => {
@@ -262,13 +268,13 @@ class HTTPChunked extends HeaderRead {
                 })
         }
     }
-    bind(...args){
+    bind(...args) {
         this.addEventListener(...args);
     }
-    on(...args){
+    on(...args) {
         this.addEventListener(...args);
     }
-    
+
     _on(...args) {
         this._emitter.on(...args);
     }
