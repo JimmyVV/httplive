@@ -1,24 +1,18 @@
 import HTTPChunked from '../src/httpflv/src';
 import MuxController from '../src/mux';
 import MSE from '../src/MSE/mseControl';
-import {stop} from 'debug/helper';
-import {downfile,download,downFLV,concatBuffer} from 'debug/helper';
+import {
+  downfile,
+  download,
+  downFLV,
+  concatBuffer
+} from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked();
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_411d9a5eee9c65aec060b9a9d20a350f.flv');
+let muxController = new MuxController();
 
-httpChunked.send("http://6721.liveplay.myqcloud.com/live/6721_411d9a5eee9c65aec060b9a9d20a350f.flv");
-
-
-
-
-
-// setTimeout(() => {
-//   // httpChunked.replace("http://6721.liveplay.myqcloud.com/live/6721_a7580dc9bee2fe09077efa645140eadd.flv")
-//   httpChunked.drop();
-// }, 3000);
-
-
+let mse = new MSE(document.getElementById('videoTag'));
 
 /**
  * Drop TestCase
@@ -47,44 +41,46 @@ httpChunked.send("http://6721.liveplay.myqcloud.com/live/6721_411d9a5eee9c65aec0
  * Stream Event TestCase
  */
 
- let sourceBuffer;
- let muxController = new MuxController();
-
- let mse = new MSE(document.getElementById('videoTag'));
-
- httpChunked.bind('stream',(stream,type)=>{
-        if(stop(10)){
-          console.log('drop');
-          httpChunked.drop();
-        }
+let v_SB,a_SB;
 
 
-        if(type === 'IS'){
-          let {buffer,mime} = muxController.parse(stream,type);
-          
-          mse.addSourceBuffer(mime)
-          .then(sb=>{
-            sourceBuffer = sb;
-            sourceBuffer.appendBuffer(buffer);
-          })
-        }else{
-          let {buffer} = muxController.parse(stream,type);
-          
-          if(buffer){
-            
-            sourceBuffer.appendBuffer(buffer);
-          }
+httpChunked.bind('stream', (stream, type) => {
 
-          
-        }
+  if (type === 'IS') {
+    let {
+      videoIS,
+      audioIS,
+      videoMime,
+      audioMime
+    } = muxController.parse(stream, type);
+
+    v_SB = mse._addSourceBuffer(videoMime);
+    a_SB = mse._addSourceBuffer(audioMime);
     
+    // concatBuffer(videoIS,100*1024);
+    v_SB.appendBuffer(videoIS);
+    a_SB.appendBuffer(audioIS);
+ 
+  } else {
+    let {
+      audioMS,videoMS
+    } = muxController.parse(stream, type);
 
- })
+
+    audioMS && a_SB.appendBuffer(audioMS);
+    videoMS && v_SB.appendBuffer(videoMS);
+
+    // videoMS && concatBuffer(videoMS,15000*1024);
+    document.getElementById('videoTag').play();
+  }
 
 
- /**
-  * End Event TestCase
-  */
+})
+
+
+/**
+ * End Event TestCase
+ */
 
 // TODO 
 // 1. bind

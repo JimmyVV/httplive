@@ -59,7 +59,7 @@ class HTTPChunked extends HeaderRead {
         this._returnArr = [];
 
         // don't automaticall trigger
-        // url && this.send(url);
+        url && this.send(url);
 
 
     }
