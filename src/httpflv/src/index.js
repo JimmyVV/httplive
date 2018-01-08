@@ -126,10 +126,14 @@ class HTTPChunked extends HeaderRead {
             // get the previous tag size
             let prvDataSize = view.getUint32(0);
 
-
+            if(view.byteLength < 8){
+                // confirm the dataSize is valid
+                break;
+            }
             let dataSize = view.getUint32(4) & 16777215;
-
-            console.log(dataSize);
+            
+            console.log("dataLength is" ,view);
+            console.log("dataSize is" ,dataSize);
 
             if (this._bufferLen - this._readLen < 11 + dataSize) {
                 // when the remained data is not a complete tag, return;

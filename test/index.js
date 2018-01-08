@@ -14,6 +14,10 @@ let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
 
+
+document.getElementById('videoTag').addEventListener('error',error=>{
+  console.error(error);
+},false);
 /**
  * Drop TestCase
  */
