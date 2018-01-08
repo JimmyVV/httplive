@@ -2,14 +2,50 @@
  * for firefox to read chunked buffer
 */
 
+
 import BaseHeader from './baseheader';
 import {
-    HTTPCANCEL,
-    CHUNKEDSTREAM,
     CHUNKEDEND,
     CHUNKEDERR,
     CHUNKEDPROGRESS
 } from 'lib/constants';
+
+
+/**
+ * @param config:
+ *          withCredentials:true,
+            timeout:0, // waiting for XHR pending
+            retry: 1,
+ * it provide some API:
+ *  send(url)
+ *  retry()
+ *  drop()
+ *  replace()
+ * if you want to receive the chunked data,
+ *  you can write some code like:
+```
+this._chunk = new XHRMozChunked({
+    retry:2
+});
+
+
+this._chunk.on('chunk',(chunk,type)=>{
+    //...
+})
+
+//end 
+this._chunk.on('end',(chunk,type)=>{
+    //...
+})
+
+// error
+this._chunk.on('error',(chunk,type)=>{
+    //...
+})
+```
+ * 
+ * 
+ */
 
 export default class XHRMozChunked extends BaseHeader{
     constructor(config){
@@ -17,6 +53,9 @@ export default class XHRMozChunked extends BaseHeader{
         
     }
     send(url){
+        this._xhr && this.drop(); // if it is used, clear it
+
+
         const xhr = this._xhr = new XMLHttpRequest();
 
         this._url = url;
@@ -48,11 +87,11 @@ export default class XHRMozChunked extends BaseHeader{
     _onError(e){
         clearTimeout(this._retryTimer);
 
-        this._retryTimer = this._reconnect >0 && setTimeout(() => {
+        this._retryTimer = this._retry >0 && setTimeout(() => {
             this.retry();
         }, 3000);
 
-        this._reconnect--; // only retry 
+        this._retry--; // only retry 
 
         throw new Error(e);
     }

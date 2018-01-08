@@ -15,6 +15,7 @@ export default class BaseHeader{
             withCredentials:true,
             timeout:0,
             retry: 1,
+            cors:true,
             chunkResolve:function(){}
         },config);
 
@@ -22,7 +23,8 @@ export default class BaseHeader{
         this._xhr;
         this._len = 0;
 
-        this._reconnect = this._config.retry;
+        this._retry = this._config.retry;
+        this._cors = this._config.cors;
         this._retryTimer;
 
         this._emitter = new Mitt;

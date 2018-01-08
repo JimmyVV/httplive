@@ -1,24 +1,64 @@
 import BaseHeader from './baseheader';
 import {
     HTTPCANCEL,
+    CHUNKEDPROGRESS,
     CHUNKEDSTREAM,
     CHUNKEDEND,
     CHUNKEDERR
 } from 'lib/constants';
 
 
-class FetchChunked extends BaseHeader{
+/**
+ * @param config:
+ *          withCredentials:true,
+            timeout:0, // waiting for XHR pending
+            retry: 1,
+ * it provide some API:
+ *  send(url)
+ *  retry()
+ *  drop()
+ *  replace()
+ * if you want to receive the chunked data,
+ *  you can write some code like:
+```
+this._chunk = new FetchChunked({
+    retry:2
+});
+
+
+this._chunk.on('chunk',(chunk,type)=>{
+    //...
+})
+
+//end 
+this._chunk.on('end',(chunk,type)=>{
+    //...
+})
+
+// error
+this._chunk.on('error',(chunk,type)=>{
+    //...
+})
+```
+ * 
+ * 
+ */
+
+export default class FetchChunked extends BaseHeader{
     constructor(config){
         super(config);
 
         this._CANCEL = false;
         this._ERROR = false;
-
+        console.log("FETCH chunked");
     }
     send(url){
         this._url = url;
-
-        fetch(url)
+        
+        console.log("FETCH SEND url ",url);
+        fetch(url,{
+            mode:this._cors
+        })
             .then(res=>{
                 let reader = res.body.getReader();
 
@@ -30,7 +70,7 @@ class FetchChunked extends BaseHeader{
                                 reader.releaseLock();
                                 res.body.cancel("the user decide to drop");
 
-                                this._emit(HTTPCANCEL);
+                                this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
 
                                 this._emit(CHUNKEDEND);
 
@@ -38,6 +78,8 @@ class FetchChunked extends BaseHeader{
                                 console.warn('dont"t support drop(). because you brower don"t support reader.releaseLock() API \n', error);
                             }
                         }
+                        // break the reading process
+                        return;
                     }
 
                     if(done){
@@ -49,7 +91,7 @@ class FetchChunked extends BaseHeader{
                         return;
                     }
 
-                    this.readChunk(value.buffer);
+                    this._emit(CHUNKEDPROGRESS,value.buffer);
 
                     
                     return reader.read().then(chunkedReader.bind(this));

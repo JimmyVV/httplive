@@ -2,6 +2,7 @@ import Mitt from 'lib/mitt';
 import {
     HTTPCANCEL,
     CHUNKEDSTREAM,
+    CHUNKEDPROGRESS,
     CHUNKEDEND,
     CHUNKEDERR
 } from 'lib/constants';
@@ -9,25 +10,47 @@ import {
     mergeBuffer
 } from 'lib/utils';
 import HeaderRead from '../lib/header';
-import {
-    debug
-} from 'util';
+
 import {
     stop
 } from 'debug/helper';
 
+import MozChunked from '../lib/xhr-ff-chunked';
+import FetchChunked from '../lib/fetch-chunked';
+
+import {detect} from 'detect-browser';
+
 class HTTPChunked extends HeaderRead {
-    constructor(url = '') {
+    constructor(url = '',config) {
         super();
 
-        if (!window.fetch) {
-            throw new Error('your browser don"t support fetch API, please use modern Browser');
+        let urlType = typeof url;
+
+        // replace the object
+        if(urlType === 'object'){
+            config = url;
+        }else if(urlType === 'string'){
+            this._url = url;
         }
 
-        this._emitter = Mitt();
-        this._url = url;
-        this._CANCEL = false;
-        this._ERROR = false;
+        this._browser = detect();
+        
+        switch(this._browser && this._browser.name){
+            case 'chrome':
+                this._xhr = new FetchChunked(config);
+                break;
+            case 'firefox':
+                this._xhr = new MozChunked(config);
+                break;
+            case 'edge':
+             default:
+             throw new Error('your browser don"t support fetch API, please use modern Browser');
+        }
+ 
+
+        this._xhr.on('chunk',this.readChunk.bind(this));
+
+        this._emitter = this._xhr._emitter;
         this._chunk = new ArrayBuffer(0);
 
         this._bufferLen;
@@ -35,71 +58,18 @@ class HTTPChunked extends HeaderRead {
 
         this._returnArr = [];
 
+        // don't automaticall trigger
+        // url && this.send(url);
 
-        url && this._fetch(url);
+
     }
-    _fetch(url) {
-        this._start();
+    
+    send(url){
 
-        fetch(url)
-            .then(res => {
-                let reader = res.body.getReader();
-
-                reader.read().then(function chunkedReader({
-                    done,
-                    value
-                }) {
-
-                    // TODO 
-                    // 1. when use deicide to drop the url
-                    // 2. when developer wanna switch to another url
-                    if (this._CANCEL) {
-                        // the user drop this video
-                        if (!done) {
-                            try {
-                                console.log('drop this url, ', url);
-                                reader.releaseLock();
-                                res.body.cancel("the user decide to drop");
-
-                                this._emit(HTTPCANCEL);
-
-                                this._emit(CHUNKEDEND);
-
-                                return;
-                            } catch (error) {
-                                console.warn('dont"t support drop(). because you brower don"t support reader.releaseLock() API \n', error);
-                            }
-
-                        };
-                    }
-
-                    if (done) {
-                        console.log('the chunked connection has stopped');
-                        this._emit(CHUNKEDEND);
-                        return;
-                    }
-
-
-                    console.log('every segment len is ', value.length);
-
-                    // this._emit(CHUNKEDSTREAM, value); // trigger the reade stream
-
-                    this.readChunk(value.buffer);
-
-                    if (stop(500)) {
-                        this.drop(); // TODO debugger
-                    }
-
-                    return reader.read().then(chunkedReader.bind(this));
-                }.bind(this))
-            })
-            .catch(err => {
-                this._ERROR = true;
-
-                this._emit(CHUNKEDERR, err);
-
-                throw new Error(err);
-            })
+        console.log(this._xhr);
+        
+        // if the param@url is undefined , use the url when init  HTTPChunked(url)
+        this._xhr.send(url || this._url);
     }
     // extract the tag data
     // reader body
@@ -194,7 +164,7 @@ class HTTPChunked extends HeaderRead {
          *      IS: initial Segment
          *      MS: media Segment
          */
-        this._emit(CHUNKEDSTREAM, this._returnArr, type);
+        this._emitter.emit(CHUNKEDSTREAM, this._returnArr, type);
 
 
     }
@@ -203,67 +173,39 @@ class HTTPChunked extends HeaderRead {
      * @param {String} url: replace the origin url to a new url Object
      */
     replace(url) {
-        this._url = url;
-
-        this.drop()
-            .then(() => {
-                this._fetch(url);
-            })
-
+        this._xhr.replace(url);
     }
     retry() {
-        console.log('retry');
-
-        // when meet error, directly fetch the resource
-        if (this._ERROR) {
-            return this._fetch(this._url);
-        }
-
-        // when the fetch is good, drop it and fetch a new one
-        this.drop()
-            .then(() => {
-                this._fetch(this._url);
-            })
-
+        this._xhr.retry();
     }
-    /**
-     * triggering condition:
-     *  1. when develop wanna use other url, like calling retry(xx)
-     *  2. when start a new fetch, reset the cancal's state
-     */
-    _start() {
-        this._CANCEL = false;
-        this._ERROR = false;
-    }
+   
     drop() {
-        this._CANCEL = true;
-
-        return new Promise((res, rej) => {
-            this._on(HTTPCANCEL, () => {
-
-                res();
-            })
-        })
+        this._xhr.drop();
     }
     addEventListener(name, fn) {
         switch (name) {
-            case 'stream':
-                this._on(CHUNKEDSTREAM, (...args) => {
+            case 'stream': // after process
+                this._emitter.on(CHUNKEDSTREAM, (...args) => {
+                    fn(...args)
+                })
+                break;
+            case 'chunk': // pure chunk
+                this._emitter.on(CHUNKEDPROGRESS,(...args)=>{
                     fn(...args)
                 })
                 break;
             case 'end':
-                this._on(CHUNKEDEND, (...args) => {
+                this._emitter.on(CHUNKEDEND, (...args) => {
                     fn(...args)
                 })
                 break;
             case 'error':
-                this._on(CHUNKEDERR, (...args) => {
+                this._emitter.on(CHUNKEDERR, (...args) => {
                     fn(...args)
                 })
                 break;
             default:
-                this._on(name, (...args) => {
+                this._emitter.on(name, (...args) => {
                     fn(...args)
                 })
         }
@@ -274,13 +216,7 @@ class HTTPChunked extends HeaderRead {
     on(...args) {
         this.addEventListener(...args);
     }
-
-    _on(...args) {
-        this._emitter.on(...args);
-    }
-    _emit(...args) {
-        this._emitter.emit(...args);
-    }
+   
 }
 
 export default HTTPChunked;

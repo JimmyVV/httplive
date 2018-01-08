@@ -1,28 +1,24 @@
-import HTTPChunked from '../src/httpflv/lib/xhr-ff-chunked';
+import HTTPChunked from '../src/httpflv/src';
 import MuxController from '../src/mux';
 import MSE from '../src/MSE/mseControl';
+import {stop} from 'debug/helper';
 import {downfile,download,downFLV,concatBuffer} from 'debug/helper';
 
 
-// let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_752d2018233f1e72e1aaf48349936219.flv');
 let httpChunked = new HTTPChunked();
 
-httpChunked.send("http://6721.liveplay.myqcloud.com/live/6721_a7580dc9bee2fe09077efa645140eadd.flv");
-
-httpChunked.on('chunk',(chunk)=>{
-  console.log('the moz chunk is ', chunk);
-});
+httpChunked.send("http://6721.liveplay.myqcloud.com/live/6721_411d9a5eee9c65aec060b9a9d20a350f.flv");
 
 
 
-setTimeout(() => {
-  // httpChunked.replace("http://6721.liveplay.myqcloud.com/live/6721_a7580dc9bee2fe09077efa645140eadd.flv")
-  httpChunked.drop();
-}, 3000);
 
-let muxController = new MuxController();
 
-let mse = new MSE(document.getElementById('videoTag'));
+// setTimeout(() => {
+//   // httpChunked.replace("http://6721.liveplay.myqcloud.com/live/6721_a7580dc9bee2fe09077efa645140eadd.flv")
+//   httpChunked.drop();
+// }, 3000);
+
+
 
 /**
  * Drop TestCase
@@ -51,32 +47,39 @@ let mse = new MSE(document.getElementById('videoTag'));
  * Stream Event TestCase
  */
 
-//  let sourceBuffer;
+ let sourceBuffer;
+ let muxController = new MuxController();
+
+ let mse = new MSE(document.getElementById('videoTag'));
+
+ httpChunked.bind('stream',(stream,type)=>{
+        if(stop(10)){
+          console.log('drop');
+          httpChunked.drop();
+        }
 
 
-//  httpChunked.bind('stream',(stream,type)=>{
-
-//         if(type === 'IS'){
-//           let {buffer,mime} = muxController.parse(stream,type);
-
-//           mse.addSourceBuffer(mime)
-//           .then(sb=>{
-//             sourceBuffer = sb;
-//             sourceBuffer.appendBuffer(buffer);
-//           })
-//         }else{
-//           let {buffer} = muxController.parse(stream,type);
+        if(type === 'IS'){
+          let {buffer,mime} = muxController.parse(stream,type);
           
-//           if(buffer){
+          mse.addSourceBuffer(mime)
+          .then(sb=>{
+            sourceBuffer = sb;
+            sourceBuffer.appendBuffer(buffer);
+          })
+        }else{
+          let {buffer} = muxController.parse(stream,type);
+          
+          if(buffer){
             
-//             sourceBuffer.appendBuffer(buffer);
-//           }
+            sourceBuffer.appendBuffer(buffer);
+          }
 
           
-//         }
+        }
     
 
-//  })
+ })
 
 
  /**
