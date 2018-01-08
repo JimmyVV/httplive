@@ -21,6 +21,7 @@
   "author": "villainhr jimmytian jimmyvv",
   "license": "BSD",
   "dependencies": {
+    "detect-browser": "^2.0.0",
     "mitt": "^1.1.2"
   }
 }
