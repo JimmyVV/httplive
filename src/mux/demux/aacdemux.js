@@ -26,7 +26,6 @@ export default class AACDemux {
 			7350
 		];
 
-		this._timestampBase = 0;
 	}
 	parse(chunk) {
 		let v = new DataView(chunk);
@@ -42,14 +41,9 @@ export default class AACDemux {
 	// chunk is SoundData in flv audio tag
 	_parseAAC(chunk) {
 		let audio = new Uint8Array(chunk);
-		let dts = this._timestampBase;
-
-		this._timestampBase += this._audioTrack.meta.refSampleDuration;
 
 		this._audioTrack.samples.push({
 			unit:audio,
-			dts,
-			pts:dts,
 			length:audio.byteLength
 		});
 

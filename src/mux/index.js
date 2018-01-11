@@ -55,10 +55,14 @@ export default class MuxController {
             return {};
  
         }
-
-
-
-        
-
     }
 }
+
+/**
+ * TODO
+ *      clear audio and video 
+ *      ? save the video and audio IS
+ *      reset the timeBase of video and audio
+ *      clear the tmpBuffer in specific sourceBuffer
+ * 
+ */

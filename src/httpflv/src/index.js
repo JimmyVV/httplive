@@ -123,10 +123,13 @@ class HTTPChunked extends HeaderRead {
             // reader DataSize
             view = new DataView(this._chunk);
 
+
             // get the previous tag size
             let prvDataSize = view.getUint32(0);
 
-            if(view.byteLength < 8){
+            this._readLen+=4; // add the 'previousTag' size
+
+            if(this._bufferLen < 11 + this._readLen){
                 // confirm the dataSize is valid
                 break;
             }
@@ -156,7 +159,7 @@ class HTTPChunked extends HeaderRead {
             });
 
             this._chunk = this._chunk.slice(tmpData.tagLen + 4); // prvTag size
-            this._readLen += tmpData.tagLen + 4;
+            this._readLen += tmpData.tagLen;
 
         }
 

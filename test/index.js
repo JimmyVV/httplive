@@ -9,7 +9,7 @@ import {
 } from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_411d9a5eee9c65aec060b9a9d20a350f.flv');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_d1ac41baf1fb460698882f7da62bf365.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));

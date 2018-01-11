@@ -18,7 +18,8 @@ export default class MP4Remux {
         this._lastTimeStamp;
         this._lastDuration;
 
-        this._timebase = 0;
+        this._videoTimebase = 0;
+        this._audioTimebase = 0;
     }
     generateIS() {
         let {
@@ -62,7 +63,7 @@ export default class MP4Remux {
             samples = track.samples,
             mp4Samples = [];
 
-        let baseDts = this._timebase;
+        let baseDts = this._videoTimebase;
 
         let lastPreciseDuration,tagDuration,deltaCorrect,tmpTime;
 
@@ -85,10 +86,12 @@ export default class MP4Remux {
                 tagDuration = this._lastTimeStamp - viSample.timeStamp;
             }
 
-            this._timebase += tagDuration;
-
-            dts = this._timebase;
+            dts = this._videoTimebase;
             pts = dts + cts;
+
+            this._videoTimebase += tagDuration;
+
+          
 
             meta.duration += tagDuration;
 
@@ -156,23 +159,24 @@ export default class MP4Remux {
             meta = track.meta,
             refDuration = meta.refSampleDuration,
             samples = track.samples,
-            baseDts = samples[0].dts,
+            baseDts = this._audioTimebase,
             mp4Samples = [];
 
         samples.forEach((accSample,index)=>{
-            let dts = accSample.dts,
-            pts = accSample.pts,
-            cts = pts - dts;
+            let dts = this._audioTimebase,
+            cts=0,
+            pts = dts + cts;
             
             audioMdat.set(accSample.unit, offset);
 
 			let sampleSize = accSample.unit.byteLength;
 
+            this._audioTimebase += refDuration;
 
             mp4Samples.push({
                 dts,
 				pts,
-                cts: 0,
+                cts,
                 sampleSize,
                 duration:refDuration,
                 chunkOffset:offset,
