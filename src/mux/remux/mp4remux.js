@@ -46,6 +46,7 @@ export default class MP4Remux {
             audioMS = this._remuxAudio();
         }
 
+        console.log("the diff time is ", this._videoTimebase -  this._audioTimebase)
 
         return {
             audioMS,
