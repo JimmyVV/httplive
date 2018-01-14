@@ -50,11 +50,12 @@ export default class FetchChunked extends BaseHeader{
 
         this._CANCEL = false;
         this._ERROR = false;
+        this._reader;
         console.log("FETCH chunked");
     }
     send(url){
         this._url = url;
-        
+        debugger
         console.log("FETCH SEND url ",url);
         fetch(url,{
             mode:this._cors
@@ -62,40 +63,14 @@ export default class FetchChunked extends BaseHeader{
             .then(res=>{
                 let reader = res.body.getReader();
 
-                reader.read().then(function chunkedReader({done,value}){
-                    if(this._CANCEL){
-                        if(!done){
-                            try {
-                                console.log('drop this url, ', url);
-                                reader.releaseLock();
-                                res.body.cancel("the user decide to drop");
+                this._xhr = res;
+                this._reader = reader;
 
-                                this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
 
-                                this._emit(CHUNKEDEND);
-
-                            } catch (error) {
-                                console.warn('dont"t support drop(). because you brower don"t support reader.releaseLock() API \n', error);
-                            }
-                        }
-                        // break the reading process
-                        return;
-                    }
-
-                    if(done){
-                        console.log('====================================');
-                        console.log('the chunked connection has stopped');
-                        console.log('====================================');
-
-                        this._emit(CHUNKEDEND);
-                        return;
-                    }
-
-                    this._emit(CHUNKEDPROGRESS,value.buffer);
-
-                    
-                    return reader.read().then(chunkedReader.bind(this));
-                }.bind(this))
+                return this._readerTmpFn();
+            })
+            .then(res=>{
+                console.log("all done");
             })
             .catch(err=>{
                 this._ERROR = true;
@@ -103,6 +78,43 @@ export default class FetchChunked extends BaseHeader{
 
                 throw new Error(err);
             })
+    }
+    _readerTmpFn(){
+
+        return this._reader.read().then(this._chunkDecode.bind(this))
+    }
+    _chunkDecode({done,value}){
+
+        if(this._CANCEL){
+            if(!done){
+                try {
+                    console.log('drop this url, ', url);
+                    this._reader.releaseLock();
+                    this._xhr.body.cancel("the user decide to drop");
+
+                    this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
+
+                    this._emit(CHUNKEDEND);
+
+                } catch (error) {
+                    throw new Error('dont"t support drop(). because you brower don"t support reader.releaseLock() API \n', error);
+                }
+            }
+            // break the reading process
+            return;
+        }
+
+        if(done){
+            console.log('====================================');
+            console.log('the chunked connection has stopped');
+            console.log('====================================');
+
+            this._emit(CHUNKEDEND);
+            return;
+        }
+        this._emit(CHUNKEDPROGRESS,value.buffer);
+
+        return this._readerTmpFn();
     }
     retry(){
         console.log('retry to connect the url,' ,this._url);

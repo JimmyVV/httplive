@@ -20,6 +20,7 @@ import FetchChunked from '../lib/fetch-chunked';
 
 import {detect} from 'detect-browser';
 
+
 class HTTPChunked extends HeaderRead {
     constructor(url = '',config) {
         super();
