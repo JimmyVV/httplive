@@ -55,8 +55,9 @@ export default class FetchChunked extends BaseHeader{
     }
     send(url){
         this._url = url;
-        debugger
+
         console.log("FETCH SEND url ",url);
+
         fetch(url,{
             mode:this._cors
         })
@@ -65,7 +66,6 @@ export default class FetchChunked extends BaseHeader{
 
                 this._xhr = res;
                 this._reader = reader;
-
 
                 return this._readerTmpFn();
             })
