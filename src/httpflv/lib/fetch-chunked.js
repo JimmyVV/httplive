@@ -44,8 +44,8 @@ this._chunk.on('error',(chunk,type)=>{
  * 
  */
 
-export default class FetchChunked extends BaseHeader{
-    constructor(config){
+export default class FetchChunked extends BaseHeader {
+    constructor(config) {
         super(config);
 
         this._CANCEL = false;
@@ -53,73 +53,85 @@ export default class FetchChunked extends BaseHeader{
         this._reader;
         console.log("FETCH chunked");
     }
-    send(url){
+    send(url) {
         this._url = url;
 
-        console.log("FETCH SEND url ",url);
-
-        fetch(url,{
-            mode:this._cors
-        })
-            .then(res=>{
-                let reader = res.body.getReader();
-
-                this._xhr = res;
-                this._reader = reader;
-
-                return this._readerTmpFn();
+        console.log("FETCH SEND url ", url);
+        
+        fetch(url, {
+                mode: this._cors
             })
-            .then(res=>{
+            .then(res => {
+
+                if (res.ok && (res.status >= 200 && res.status <= 299)) {
+                    let reader = res.body.getReader();
+
+                    this._xhr = res;
+                    this._reader = reader;
+
+                    return this._readerTmpFn(reader);
+                } else {
+                    this._emit(CHUNKEDEND);
+                }
+
+            })
+            .then(res => {
                 console.log("all done");
             })
-            .catch(err=>{
-                this._ERROR = true;
-                this._emit(CHUNKEDERR,err);
+            .catch(err => { 
 
-                throw new Error(err);
+                this._ERROR = true;
+                this._emit(CHUNKEDERR, err);
+                this._emit(CHUNKEDEND);
+
+                console.error(err);
             })
     }
-    _readerTmpFn(){
+    _readerTmpFn(reader) {
 
-        return this._reader.read().then(this._chunkDecode.bind(this))
-    }
-    _chunkDecode({done,value}){
+        return reader.read().then((({done,value})=>{
+            if (this._CANCEL) {
+                if (!done) {
+                    try {
+                        console.log('drop this url, ', this._url);
 
-        if(this._CANCEL){
-            if(!done){
-                try {
-                    console.log('drop this url, ', url);
-                    this._reader.releaseLock();
-                    this._xhr.body.cancel("the user decide to drop");
+                        this._reader.releaseLock();
 
-                    this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
-
-                    this._emit(CHUNKEDEND);
-
-                } catch (error) {
-                    throw new Error('dont"t support drop(). because you brower don"t support reader.releaseLock() API \n', error);
+                        this._xhr.body.cancel("the user decide to drop");
+    
+                        this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
+    
+                        this._emit(CHUNKEDEND);
+    
+                    } catch (error) {
+                        console.error('dont"t support drop(). because you brower don"t support reader.releaseLock() API \n', error);
+                    }
                 }
+                // break the reading process
+                return;
             }
-            // break the reading process
-            return;
-        }
+    
+            if (done) {
+                console.log('====================================');
+                console.log('the chunked connection has stopped');
+                console.log('====================================');
+    
+                this._emit(CHUNKEDEND);
+                return;
+            }
+            // this._emit(CHUNKEDPROGRESS, value.buffer);
+    
+            this._chunkReader(value.buffer);
 
-        if(done){
-            console.log('====================================');
-            console.log('the chunked connection has stopped');
-            console.log('====================================');
+            value = null
 
-            this._emit(CHUNKEDEND);
-            return;
-        }
-        this._emit(CHUNKEDPROGRESS,value.buffer);
-
-        return this._readerTmpFn();
+            return this._readerTmpFn(reader);
+        }));
     }
-    retry(){
-        console.log('retry to connect the url,' ,this._url);
+    retry() {
+        console.log('retry to connect the url,', this._url);
 
-        if(this._ERROR){
+        if (this._ERROR) {
             return this.send(this._url);
         }
 
@@ -128,7 +140,7 @@ export default class FetchChunked extends BaseHeader{
                 this.send(this._url);
             })
     }
-    drop(){
+    drop() {
         this._CANCEL = true;
 
         return new Promise((res, rej) => {
@@ -139,16 +151,16 @@ export default class FetchChunked extends BaseHeader{
         })
 
     }
-    replace(url){
+    replace(url) {
         console.log('replace the url: ', url);
 
         this.drop()
-        .then(() => {
-            this.send(url);
-        })
+            .then(() => {
+                this.send(url);
+            })
 
     }
-    _init(){
+    _init() {
         this._CANCEL = false;
         this._ERROR = false;
     }

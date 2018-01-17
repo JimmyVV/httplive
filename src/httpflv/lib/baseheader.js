@@ -67,6 +67,9 @@ export default class BaseHeader{
     on(...args) {
         this.addEventListener(...args);
     }
+    set onChunkReader(fn){
+        this._chunkReader = fn;
+    }
 
     _on(...args) {
         this._emitter.on(...args);

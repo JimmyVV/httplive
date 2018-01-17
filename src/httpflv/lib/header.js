@@ -7,6 +7,8 @@ export default class HeaderRead{
             9:'video',
             18:'script'
         }
+
+        this._buffer;
     }
     _flvHeader(chunk){
         let data = chunk.slice(3);
@@ -52,7 +54,11 @@ export default class HeaderRead{
             timeStamp|= (upperTime << 24);
         }
 
+        
+        this._buffer = chunk.slice(0,dataSize + dataOffset);
 
+        view = null;
+        chunk = null; // funk u !!!!!!
 
         return {
             type,
@@ -60,7 +66,7 @@ export default class HeaderRead{
             timeStamp,
             dataOffset,
             tagLen:dataSize+dataOffset,
-            buffer:chunk.slice(0,dataSize + dataOffset)
+            buffer:this._buffer
         }
 
     }

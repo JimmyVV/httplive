@@ -6,7 +6,7 @@ const Uglifyjs = require('uglifyjs-webpack-plugin');
 const COMPILE = (process.env.NODE_ENV === 'compile');
 
 let config = {
-    devtool: 'inline-source-map',
+    devtool: 'cheap-module-eval-source-map',
     context: path.join(__dirname),
     entry: {
         index: path.join(__dirname, 'test')
@@ -24,8 +24,8 @@ let config = {
             use: [{
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015'],
-                    compact: true
+                    presets: ['es2015',"stage-0"],
+                    retainLines:true
                 }
             }]
         }]
@@ -41,6 +41,7 @@ if (COMPILE) {
         }
     }));
 }
+
 
 
 module.exports = config;
