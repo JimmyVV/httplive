@@ -117,7 +117,6 @@ export default class FetchChunked extends BaseHeader {
             }
 
             this._emit(CHUNKEDPROGRESS, value.buffer);
-            // this._chunkReader(value.buffer);
 
             // resolve the memory leak
             // never use retrun fn

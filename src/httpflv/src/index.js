@@ -143,14 +143,10 @@ class HTTPChunked extends HeaderRead {
             }
             let dataSize = view.getUint32(4) & 16777215;
 
-            // console.log("dataLength is" ,view);
-            // console.log("dataSize is" ,dataSize);
-
             if (this._bufferLen - this._readLen < 11 + dataSize) {
                 // when the remained data is not a complete tag, return;
                 break;
             }
-            // console.log(this._returnArr);
             // decode Flv tag
             tmpData = this._flvTag(this._chunk.slice(4));
 
