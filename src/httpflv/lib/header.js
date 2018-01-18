@@ -2,7 +2,7 @@ import { debug } from "util";
 
 export default class HeaderRead{
     constructor(){
-        this._type = {
+        this.type = {
             8:'audio',
             9:'video',
             18:'script'
@@ -40,7 +40,8 @@ export default class HeaderRead{
     _flvTag(chunk){
         let view = new DataView(chunk);
 
-        let type = this._type[view.getUint8(0)];
+        let type = this.type[view.getUint8(0)];
+
 
         let dataSize = view.getUint32(0) & 16777215;
 
@@ -54,11 +55,8 @@ export default class HeaderRead{
             timeStamp|= (upperTime << 24);
         }
 
-        
         this._buffer = chunk.slice(0,dataSize + dataOffset);
 
-        view = null;
-        chunk = null; // funk u !!!!!!
 
         return {
             type,

@@ -58,18 +58,16 @@ export default class FetchChunked extends BaseHeader {
 
         console.log("FETCH SEND url ", url);
         
-        fetch(url, {
+        window.fetch(url, {
                 mode: this._cors
             })
             .then(res => {
 
                 if (res.ok && (res.status >= 200 && res.status <= 299)) {
-                    let reader = res.body.getReader();
 
-                    this._xhr = res;
-                    this._reader = reader;
+                    // this._xhr = res;
 
-                    return this._readerTmpFn(reader);
+                    return this._readerTmpFn.call(this,res.body.getReader());
                 } else {
                     this._emit(CHUNKEDEND);
                 }
@@ -89,16 +87,14 @@ export default class FetchChunked extends BaseHeader {
     }
     _readerTmpFn(reader) {
 
-        return reader.read().then((({done,value})=>{
+        return reader.read().then(({done,value})=>{
             if (this._CANCEL) {
                 if (!done) {
                     try {
                         console.log('drop this url, ', this._url);
 
-                        this._reader.releaseLock();
+                        reader.releaseLock();
 
-                        this._xhr.body.cancel("the user decide to drop");
-    
                         this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
     
                         this._emit(CHUNKEDEND);
@@ -119,14 +115,21 @@ export default class FetchChunked extends BaseHeader {
                 this._emit(CHUNKEDEND);
                 return;
             }
-            // this._emit(CHUNKEDPROGRESS, value.buffer);
-    
-            this._chunkReader(value.buffer);
 
-            value = null
+            this._emit(CHUNKEDPROGRESS, value.buffer);
+            // this._chunkReader(value.buffer);
 
-            return this._readerTmpFn(reader);
-        }));
+            // resolve the memory leak
+            // never use retrun fn
+            this._readerTmpFn(reader)
+        }).catch(err => { 
+
+            this._ERROR = true;
+            this._emit(CHUNKEDERR, err);
+            this._emit(CHUNKEDEND);
+
+            console.error(err);
+        });
     }
     retry() {
         console.log('retry to connect the url,', this._url);

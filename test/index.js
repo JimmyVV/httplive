@@ -9,7 +9,7 @@ import {
 } from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_e650801399089f22a6cfb32b0cd10a4a.flv');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_f4f2ba04adf83a10f000bc00afdb7030.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
@@ -22,6 +22,52 @@ document.getElementById('videoTag').addEventListener('error',error=>{
  * Drop TestCase
  */
 
+let v_SB,a_SB;
+
+
+httpChunked.bind('stream', (stream, type) => {
+
+
+  if (type === 'IS') {
+    let {
+      videoIS,
+      audioIS,
+      videoMime,
+      audioMime
+    } = muxController.parse(stream, type);
+
+    v_SB = mse._addSourceBuffer(videoMime);
+    a_SB = mse._addSourceBuffer(audioMime);
+    
+    // concatBuffer(videoIS,100*1024);
+    v_SB.appendBuffer(videoIS);
+    a_SB.appendBuffer(audioIS);
+ 
+  } else {
+    let {
+      audioMS,videoMS
+    } = muxController.parse(stream, type);
+
+
+    audioMS && a_SB.appendBuffer(audioMS);
+    videoMS && v_SB.appendBuffer(videoMS);
+
+    // videoMS && concatBuffer(videoMS,15000*1024);
+    document.getElementById('videoTag').play();
+  }
+
+
+})
+
+
+/**
+ * End Event TestCase
+ */
+
+// TODO 
+// 1. bind
+// 2. end
+// 3. start
 
 
 
@@ -42,49 +88,3 @@ document.getElementById('videoTag').addEventListener('error',error=>{
 /**
  * Stream Event TestCase
  */
-
-let v_SB,a_SB;
-
-
-// httpChunked.bind('stream', (stream, type) => {
-
-//   if (type === 'IS') {
-//     let {
-//       videoIS,
-//       audioIS,
-//       videoMime,
-//       audioMime
-//     } = muxController.parse(stream, type);
-
-//     v_SB = mse._addSourceBuffer(videoMime);
-//     a_SB = mse._addSourceBuffer(audioMime);
-    
-//     // concatBuffer(videoIS,100*1024);
-//     v_SB.appendBuffer(videoIS);
-//     a_SB.appendBuffer(audioIS);
- 
-//   } else {
-//     let {
-//       audioMS,videoMS
-//     } = muxController.parse(stream, type);
-
-
-//     audioMS && a_SB.appendBuffer(audioMS);
-//     videoMS && v_SB.appendBuffer(videoMS);
-
-//     // videoMS && concatBuffer(videoMS,15000*1024);
-//     document.getElementById('videoTag').play();
-//   }
-
-
-// })
-
-
-/**
- * End Event TestCase
- */
-
-// TODO 
-// 1. bind
-// 2. end
-// 3. start

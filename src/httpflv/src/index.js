@@ -50,9 +50,8 @@ class HTTPChunked extends HeaderRead {
         }
  
 
-        // this._xhr.on('chunk',this.readChunk.bind(this));
-
-        this._xhr.onChunkReader = this.readChunk.bind(this);
+        this._xhr.on('chunk',this.readChunk.bind(this));
+        // this._xhr.onChunkReader = this.readChunk.bind(this);
 
         this._emitter = this._xhr._emitter;
         this._chunk = new ArrayBuffer(0);
@@ -62,10 +61,6 @@ class HTTPChunked extends HeaderRead {
 
         this._returnArr = [];
         this._type = 'MS';
-
-        this._tmpData;
-        this._ab;
-        this._view;
 
 
         // don't automaticall trigger
@@ -90,9 +85,10 @@ class HTTPChunked extends HeaderRead {
     readChunk(chunk) {
         // reder FLV header
         this._chunk = mergeBuffer(this._chunk, chunk);
-
+        
         chunk = null;
 
+        let tmpData, ab, view;
 
         this._bufferLen = this._chunk.byteLength;
         this._readLen = 0;
@@ -104,23 +100,23 @@ class HTTPChunked extends HeaderRead {
         while (this._bufferLen - this._readLen > 11) {
 
 
-            this._ab = new Uint8Array(this._chunk);
+            ab = new Uint8Array(this._chunk);
 
 
             // reader FLV File Header
-            if (this._ab[0] === 0x46 && this._ab[1] === 0x4C && this._ab[2] === 0x56) {
+            if (ab[0] === 0x46 && ab[1] === 0x4C && ab[2] === 0x56) {
 
                 // reader FLV header
-                this._tmpData = this._flvHeader(this._chunk.slice(0, 9));
+                tmpData = this._flvHeader(this._chunk.slice(0, 9));
 
                 this._returnArr.push({
-                    buffer: this._tmpData.buffer,
+                    buffer: tmpData.buffer,
                     info: {
-                        type: this._tmpData.type,
-                        version: this._tmpData.version,
-                        tagOffset: this._tmpData.tagOffset,
-                        hasAudio: this._tmpData.hasAudio,
-                        hasVideo: this._tmpData.hasVideo,
+                        type: tmpData.type,
+                        version: tmpData.version,
+                        tagOffset: tmpData.tagOffset,
+                        hasAudio: tmpData.hasAudio,
+                        hasVideo: tmpData.hasVideo,
                     }
                 })
                 this._readLen += 9;
@@ -133,7 +129,7 @@ class HTTPChunked extends HeaderRead {
             
 
             // reader DataSize
-            this._view = new DataView(this._chunk);
+            view = new DataView(this._chunk);
 
 
             // get the previous tag size
@@ -145,38 +141,35 @@ class HTTPChunked extends HeaderRead {
                 // confirm the dataSize is valid
                 break;
             }
-            let dataSize = this._view.getUint32(4) & 16777215;
+            let dataSize = view.getUint32(4) & 16777215;
 
-            console.log("dataLength is" ,this._view);
-            console.log("dataSize is" ,dataSize);
+            // console.log("dataLength is" ,view);
+            // console.log("dataSize is" ,dataSize);
 
             if (this._bufferLen - this._readLen < 11 + dataSize) {
                 // when the remained data is not a complete tag, return;
                 break;
             }
-            console.log(this._returnArr);
+            // console.log(this._returnArr);
             // decode Flv tag
-            this._tmpData = this._flvTag(this._chunk.slice(4));
+            tmpData = this._flvTag(this._chunk.slice(4));
 
 
             this._returnArr.push({
-                buffer: this._tmpData.buffer,
+                buffer: tmpData.buffer,
                 info: {
-                    type: this._tmpData.type,
-                    dataOffset: this._tmpData.dataOffset,
-                    dataSize: this._tmpData.dataSize,
-                    timeStamp: this._tmpData.timeStamp,
-                    tagLen: this._tmpData.tagLen
+                    type: tmpData.type,
+                    dataOffset: tmpData.dataOffset,
+                    dataSize: tmpData.dataSize,
+                    timeStamp: tmpData.timeStamp,
+                    tagLen: tmpData.tagLen
                 }
             });
 
-            this._chunk = this._chunk.slice(this._tmpData.tagLen + 4); // prvTag size
-            this._readLen += this._tmpData.tagLen;
+            this._chunk = this._chunk.slice(tmpData.tagLen + 4); // prvTag size
+            this._readLen += tmpData.tagLen;
 
 
-            dataSize = null;
-            // ab = null;
-            // tmpData = null;
         }
 
         // detect the arr is empty, then don't return

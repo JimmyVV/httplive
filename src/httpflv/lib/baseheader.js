@@ -67,6 +67,7 @@ export default class BaseHeader{
     on(...args) {
         this.addEventListener(...args);
     }
+    // polyfill fn
     set onChunkReader(fn){
         this._chunkReader = fn;
     }
