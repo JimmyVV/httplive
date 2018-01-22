@@ -20,6 +20,11 @@ export default class MP4Remux {
 
         this._videoTimebase = 0;
         this._audioTimebase = 0;
+
+        this._audioClockRange = {
+            startTS:0,
+            endTS:0,
+        };
     }
     generateIS() {
         let {
