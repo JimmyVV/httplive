@@ -183,16 +183,23 @@ export default class AVCDemux {
         meta.presentWidth = spsInfo.present_size.width;
         meta.presentHeight = spsInfo.present_size.height;
 
+        // debugger
+        meta.frame_rate = spsInfo.frame_rate;
+
         console.log(spsInfo);
+
+
         if (spsInfo.frame_rate.fixed === false || spsInfo.frame_rate.fps_num === 0 || spsInfo.frame_rate.fps_den === 0) {
-            meta.frameRate = this._referenceFrameRate;
+            meta.frame_rate = this._referenceFrameRate;
         }
 
         let {
             fps_den,
             fps_num
-        } = meta.frameRate;
+        } = meta.frame_rate;
+
         meta.refSampleDuration = Math.floor(meta.timescale * (fps_den / fps_num));
+
 
         // get AVC codec
         let codecArray = sps.subarray(1, 4);

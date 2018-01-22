@@ -158,5 +158,7 @@ export default class AACDemux {
 
 		meta.refSampleDuration = Math.floor(1024 / meta.audioSampleRate * meta.timescale);
 
+		console.log(meta.refSampleDuration);
+
 	}
 }

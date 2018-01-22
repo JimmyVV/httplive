@@ -20,7 +20,7 @@ export default class MuxController {
     }
     parse(chunkArray, type = "MS") {
         this._flvDemux.parse(chunkArray);
-
+        
         if (type === "IS") {
             let {videoIS,
                 audioIS} = this._mp4Remux.generateIS();
@@ -32,6 +32,7 @@ export default class MuxController {
                 audioMime:this._flvDemux.audioMIME
             }
         } else {
+
             // cache at least 2 video tags
             if (this._videoTrack.samples.length > 1) {
                 

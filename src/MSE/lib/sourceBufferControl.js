@@ -29,7 +29,8 @@ class SourceBufferControl {
         sourceBuffer.addEventListener('update', () => {}, false);
         sourceBuffer.addEventListener('updateend', this._updateEndHandler.bind(this), false);
 
-        this.release();
+        // now, don't to release
+        // this.release();
 
     }
     _updateEndHandler() {
@@ -124,6 +125,10 @@ class SourceBufferControl {
             this._sb.appendBuffer(mergeUnit8Array(this._tmpBuffer));
 
             this._tmpBuffer = [];
+
+
+            // need to remove, 
+            console.log(this._ms.duration);
         }
     }
 
