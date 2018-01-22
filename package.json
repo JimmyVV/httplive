@@ -1,0 +1,27 @@
+{
+  "name": "av.js",
+  "version": "0.0.1",
+  "description": "html5 DASH framework, easily implement and combine",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server . -c -1 & webpack  -w -p ",
+    "release": "http-server . -c -1 & NODE_ENV=compile webpack -w"
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-external-helpers": "^6.22.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-es2015": "^6.24.1",
+    "strip-loader": "^0.1.2",
+    "uglifyjs-webpack-plugin": "^0.4.6",
+    "webpack": "^3.8.1",
+    "webpack-stream": "^4.0.0"
+  },
+  "author": "villainhr jimmytian jimmyvv",
+  "license": "BSD",
+  "dependencies": {
+    "detect-browser": "^2.0.0",
+    "mitt": "^1.1.2"
+  }
+}
