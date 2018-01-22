@@ -41,15 +41,10 @@ export default class MP4Remux {
         if (this._audioTrack.samples.length >=2 && 
                this._videoTrack.samples.length ) {
             audioMS = this._remuxAudio();
-        }
-
-        if (this._videoTrack.samples.length) {
-            this._lastTimeStamp = lastTimeStamp;
             videoMS = this._remuxVideo();
         }
 
-
-
+        
         console.log("the diff time is ", this._videoTimebase - this._audioTimebase)
 
         return {

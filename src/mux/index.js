@@ -14,7 +14,7 @@ export default class MuxController {
             mediaInfo: this._flvDemux.mediaInfo
         });
 
-        this._lastVideoSample;
+
         this._videoTrack = this._flvDemux.videoTrack;
         this._audioTrack = this._flvDemux.audioTrack;
     }
@@ -36,15 +36,9 @@ export default class MuxController {
             // cache at least 2 video tags
             if (this._videoTrack.samples.length > 1) {
                 
-                this._lastVideoSample = this._videoTrack.samples.pop();
-                this._videoTrack.length -= this._lastVideoSample.length;
                 
                 let {audioMS,videoMS} = this._mp4Remux.generateMS(this._lastVideoSample.timeStamp);
-             
-                this._videoTrack.samples = [this._lastVideoSample];
-                this._videoTrack.length = this._lastVideoSample.length;
-                this._audioTrack.samples = [];
-                this._audioTrack.length = 0;
+            
 
 
                 return {
