@@ -27,7 +27,7 @@ export default class AACDemux {
 		];
 
 	}
-	parse(chunk) {
+	parse(chunk,timeStamp) {
 		let v = new DataView(chunk);
 
 		let type = v.getUint8(0);
@@ -35,16 +35,17 @@ export default class AACDemux {
 		if (type === 0) {
 			this._parseConfig(chunk.slice(1));
 		} else {
-			this._parseAAC(chunk.slice(1));
+			this._parseAAC(chunk.slice(1),timeStamp);
 		}
 	}
 	// chunk is SoundData in flv audio tag
-	_parseAAC(chunk) {
+	_parseAAC(chunk,timeStamp) {
 		let audio = new Uint8Array(chunk);
 
 		this._audioTrack.samples.push({
 			unit:audio,
-			length:audio.byteLength
+			length:audio.byteLength,
+			timeStamp
 		});
 
 		this._audioTrack.length += audio.byteLength;
