@@ -3,6 +3,8 @@ import {
     mergeTypedArray
 } from 'lib/utils';
 
+import videoTmpSamples from './lib/videoTmpSamples';
+
 export default class MP4Remux {
     constructor({
         audioTrack,

@@ -3,6 +3,10 @@ export default class TrackInfo {
         this._videoTrack = {
             type: 'video',
             id:1,
+            /**
+             * the samples Object contain:
+             *  @prop dts,cts
+             */
             samples: [],
             length: 0, // the data length of samples
             meta: {
@@ -26,6 +30,12 @@ export default class TrackInfo {
             type: 'audio',
             id: 2,
             sequenceNumber: 0,
+            /**
+             * the samples Object contain:
+             *  @prop dts, cts = 0
+             *  @prop unit [ArrayBuffer]
+             *  
+             */
             samples: [],
             length: 0,
             meta: {
