@@ -81,6 +81,7 @@ export default class MP4Remux {
             videoMdat.set(viSample.slices, offset);
 
             let keyFrame = viSample.keyFrame;
+            
 
             if (samples.length > 1 && samples.length !== index + 1) {
                 // loop the samples but not the last one
