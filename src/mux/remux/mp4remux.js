@@ -147,8 +147,66 @@ export default class MP4Remux {
 
         return mergeTypedArray(moof, audioMdat);
     }
+    /** 
+     * @desc finish four things:
+     *          1. filter the effective samples from tmpBuffer and videoTrack 
+     *                  which are before audio.endTS
+     *          2. replace the video.samples by effective samples
+     *          3. save the tmpBuffers which is beyond audio.endTS
+     *          4. calculate the length of videoTack samples
+     * 
+    */
+    _filterEffectiveVideo(){
+        let startTS = this._audioClockRange.startTS,
+            endTS = this._audioClockRange.endTS;
+        
+        let tmpBuffer = [], // the tmpBuffers array
+            samples = []; // effective samples for videoTrack
 
+        // travrse videoTmpSamples
+        
+        videoTmpSamples.samples.forEach(sample=>{
+            if(sample.timeStamp >= endTS){
+                samples.push(sample)
+            }else{
+                tmpBuffer.push(sample)
+            }
+        });
+    
+        // travrse this._videoTrack.samples
+
+        this._videoTrack.samples.forEach(sample=>{
+            if(sample.timeStamp >= endTS){
+                samples.push(sample)
+            }else{
+                tmpBuffer.push(sample)
+            }
+        });
+
+
+        // when the remaining samples are beyond endTS,
+        // put these samples into videoTmpSamples
+        videoTmpSamples.samples = tmpBuffer;
+        
+        // calcuate the samples.length
+        this._videoTrack.length = samples.reduce((sum,val)=>{
+            return sum + val.length;
+        },0);
+
+        // resolve these effective samples into this._videoTrack.samples;
+        this._videoTrack.samples = samples;
+
+
+    }
     _remuxVideo() {
+
+        // get the effective length
+        // filter the videoBuffer
+
+        this._filterEffectiveVideo();
+
+        // TODO verify/test endTS logic 
+
         let {
             videoMdat,
             baseDts
@@ -169,6 +227,10 @@ export default class MP4Remux {
             samples = track.samples,
             baseDts = this._audioTimebase,
             mp4Samples = [];
+
+        // set the timeStamp range
+        this._audioClockRange.startTS = samples[0].timeStamp;
+        this._audioClockRange.endTS = samples[samples.length-1].timeStamp;
 
         samples.forEach((accSample, index) => {
             let dts = this._audioTimebase,

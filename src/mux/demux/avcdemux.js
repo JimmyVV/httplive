@@ -23,7 +23,6 @@ export default class AVCDemux {
         };
 
         this._naluLengthSize = 4;
-        this._timestampBase = 0;
 
         this._keyFrame = {1:true,2:false};
     }
@@ -65,9 +64,7 @@ export default class AVCDemux {
         let keyFrame = !!this._keyFrame[frameType];
 
         let naluLen = this._naluLengthSize;
-        let dts = this._timestampBase;
-
-        this._timestampBase += 23; // set the default value
+        
 
         while(offset < dataSize ){
             if (offset + 4 >= dataSize) {

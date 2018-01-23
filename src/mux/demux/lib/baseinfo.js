@@ -5,7 +5,12 @@ export default class TrackInfo {
             id:1,
             /**
              * the samples Object contain:
-             *  @prop dts,cts
+             *  @prop cts
+             *  @prop slice [ArrayBuffer] the raw AVC data
+             *  @prop timeStamp [Number] the raw millsecond from the server
+             *  @prop keyFrame [Boolean] keyframe or not
+             *  @prop length [Number] the slices.bytenlength,
+             *                          and it will change according to effective DTS ranges in _remuxVideo()
              */
             samples: [],
             length: 0, // the data length of samples
@@ -34,7 +39,7 @@ export default class TrackInfo {
              * the samples Object contain:
              *  @prop dts, cts = 0
              *  @prop unit [ArrayBuffer]
-             *  
+             *  @prop timeStamp [Number] the absolute milesecond from server
              */
             samples: [],
             length: 0,
