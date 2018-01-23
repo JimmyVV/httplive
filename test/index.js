@@ -9,7 +9,7 @@ import {
 } from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_aa47ba657f7b18403082ec141857a255.flv');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_50004cb3d24ccc34b94eef33e3b4548c.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
@@ -29,6 +29,12 @@ httpChunked.bind('stream', (stream, type) => {
 
 
   if (type === 'IS') {
+    
+
+    // skip the subsequent IS info
+    if(v_SB){
+      return;
+    }
     let {
       videoIS,
       audioIS,

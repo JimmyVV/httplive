@@ -57,6 +57,110 @@ export default class MP4Remux {
 
     }
 
+    
+    _remuxAudio() {
+        let {
+            audioMdat,
+            baseDts
+        } = this._remuxAudioMdat();
+
+        let moof = MP4.moof(this._audioTrack, baseDts, this._audioSeg);
+
+        this._audioTrack.samples = [];
+
+        return mergeTypedArray(moof, audioMdat);
+    }
+    /** 
+     * @desc finish four things:
+     *          1. filter the effective samples from tmpBuffer and videoTrack 
+     *                  which are before audio.endTS
+     *          2. replace the video.samples by effective samples
+     *          3. save the tmpBuffers which is beyond audio.endTS
+     *          4. calculate the length of videoTack samples
+     * 
+    */
+    _filterEffectiveVideo(){
+        let startTS = this._audioClockRange.startTS,
+            endTS = this._audioClockRange.endTS;
+        
+        let tmpBuffer = [], // the tmpBuffers array
+            samples = []; // effective samples for videoTrack
+
+        // travrse videoTmpSamples
+        
+        this._videoTmpSamples.forEach(sample=>{
+            if(sample.timeStamp <= endTS){
+                samples.push(sample)
+            }else{
+                tmpBuffer.push(sample)
+            }
+        });
+    
+        // travrse this._videoTrack.samples
+
+        this._videoTrack.samples.forEach(sample=>{
+            if(sample.timeStamp <= endTS){
+                samples.push(sample)
+            }else{
+                tmpBuffer.push(sample)
+            }
+        });
+
+
+        if(tmpBuffer.length === 0 && samples.length > 0){
+            // put one samples into tmpBuffer,
+            // extract the timeStamp
+            let nextSample = samples.pop();
+            this._lastTimeStamp = nextSample.timeStamp;
+            tmpBuffer.push(nextSample);
+
+            // these is maybe memoery leak here.
+            // nextSample = null;
+        }
+
+
+        // when the remaining samples are beyond endTS,
+        // put these samples into videoTmpSamples
+        this._videoTmpSamples = tmpBuffer;
+        
+        // calcuate the samples.length
+        this._videoTrack.length = samples.reduce((sum,val)=>{
+            return sum + val.length;
+        },0);
+
+        // resolve these effective samples into this._videoTrack.samples;
+        this._videoTrack.samples = samples;
+
+
+
+
+    }
+    _remuxVideo() {
+
+        // get the effective length
+        // filter the videoBuffer
+
+        this._filterEffectiveVideo();
+
+        // TODO verify/test endTS logic 
+
+        if(this._videoTrack.samples.length === 0){
+            // when the videoSamples is 
+            return;
+        }
+
+        let {
+            videoMdat,
+            baseDts
+        } = this._remuxVideoMdat();
+
+        let moof = MP4.moof(this._videoTrack, baseDts, this._videoSeq);
+
+        this._videoTrack.samples = []; // reset 
+
+
+        return mergeTypedArray(moof, videoMdat);
+    }
     _remuxVideoMdat() {
         let videoMdat = MP4.mdat(this._videoTrack.length);
 
@@ -70,7 +174,7 @@ export default class MP4Remux {
 
         let lastPreciseDuration, tagDuration, deltaCorrect, tmpTime;
 
-
+        
         samples.forEach((viSample, index) => {
             let cts = viSample.cts,
                 dts, pts;
@@ -122,7 +226,7 @@ export default class MP4Remux {
 
             offset += viSample.length;
         });
-
+        debugger
 
         track.samples = mp4Samples;
         this._videoSeq++;
@@ -134,95 +238,6 @@ export default class MP4Remux {
 
     }
 
-    _remuxAudio() {
-        let {
-            audioMdat,
-            baseDts
-        } = this._remuxAudioMdat();
-
-        let moof = MP4.moof(this._audioTrack, baseDts, this._audioSeg);
-
-        this._audioTrack.samples = [];
-
-        return mergeTypedArray(moof, audioMdat);
-    }
-    /** 
-     * @desc finish four things:
-     *          1. filter the effective samples from tmpBuffer and videoTrack 
-     *                  which are before audio.endTS
-     *          2. replace the video.samples by effective samples
-     *          3. save the tmpBuffers which is beyond audio.endTS
-     *          4. calculate the length of videoTack samples
-     * 
-    */
-    _filterEffectiveVideo(){
-        let startTS = this._audioClockRange.startTS,
-            endTS = this._audioClockRange.endTS;
-        
-        let tmpBuffer = [], // the tmpBuffers array
-            samples = []; // effective samples for videoTrack
-
-        // travrse videoTmpSamples
-        
-        this._videoTmpSamples.forEach(sample=>{
-            if(sample.timeStamp <= endTS){
-                samples.push(sample)
-            }else{
-                tmpBuffer.push(sample)
-            }
-        });
-    
-        // travrse this._videoTrack.samples
-
-        this._videoTrack.samples.forEach(sample=>{
-            if(sample.timeStamp <= endTS){
-                samples.push(sample)
-            }else{
-                tmpBuffer.push(sample)
-            }
-        });
-
-
-        // when the remaining samples are beyond endTS,
-        // put these samples into videoTmpSamples
-        this._videoTmpSamples = tmpBuffer;
-        
-        // calcuate the samples.length
-        this._videoTrack.length = samples.reduce((sum,val)=>{
-            return sum + val.length;
-        },0);
-
-        // resolve these effective samples into this._videoTrack.samples;
-        this._videoTrack.samples = samples;
-
-    }
-    _remuxVideo() {
-
-        // get the effective length
-        // filter the videoBuffer
-
-        this._filterEffectiveVideo();
-
-        // TODO verify/test endTS logic 
-
-        if(this._videoTrack.samples.length === 0){
-            // when the videoSamples is 
-            return;
-        }
-
-
-        let {
-            videoMdat,
-            baseDts
-        } = this._remuxVideoMdat();
-
-        let moof = MP4.moof(this._videoTrack, baseDts, this._videoSeq);
-
-        this._videoTrack.samples = []; // reset 
-
-
-        return mergeTypedArray(moof, videoMdat);
-    }
     _remuxAudioMdat() {
         let audioMdat = MP4.mdat(this._audioTrack.length);
 
