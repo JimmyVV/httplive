@@ -1,4 +1,4 @@
-class videoTmpSamples{
+export default class videoTmpSamples{
     constructor(){
         this._tmpBuffers = [];
     }
@@ -10,4 +10,9 @@ class videoTmpSamples{
     }
 }
 
-export default new videoTmpSamples;
+
+
+
+
+
+// export default tmp;

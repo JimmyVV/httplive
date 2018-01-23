@@ -9,7 +9,7 @@ import {
 } from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('https://1ge51hcjw8yzdnpjtfaauepa.ourdvsss.com/live-play.acgvideo.com/live/596/live_180179454_5179394.flv?wsSecret=a8a26c753734c058dc8e0c810e8daf44&wsTime=5a3f4c95&wshc_tag=0&wsts_tag=5a66cb85&wsid_tag=e111622&wsiphost=ipdbm');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_aa47ba657f7b18403082ec141857a255.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
@@ -45,7 +45,6 @@ httpChunked.bind('stream', (stream, type) => {
  
   } else {
 
-    debugger
 
     let {
       audioMS,videoMS

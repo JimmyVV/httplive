@@ -3,7 +3,8 @@ import MP4Remux from './remux/mp4remux';
 import {
     concatBuffer
 } from 'debug/helper';
-import videoTmpSamples from './remux/lib/videoTmpSamples';
+
+
 
 export default class MuxController {
     constructor() {
@@ -35,9 +36,10 @@ export default class MuxController {
         } else {
 
             // keep there is enough audio samples
-            if (this._audioTrack.samples.length >1 && (this._videoTrack.samples.length + videoTmpSamples.length) >1 ) {
+
+            if (this._audioTrack.samples.length >1 && (this._videoTrack.samples.length) >1 ) {
                 
-                let {audioMS,videoMS} = this._mp4Remux.generateMS(this._lastVideoSample.timeStamp);
+                let {audioMS,videoMS} = this._mp4Remux.generateMS();
             
 
                 return {

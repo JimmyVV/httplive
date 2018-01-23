@@ -3,8 +3,6 @@ import {
     mergeTypedArray
 } from 'lib/utils';
 
-import videoTmpSamples from './lib/videoTmpSamples';
-
 export default class MP4Remux {
     constructor({
         audioTrack,
@@ -27,6 +25,10 @@ export default class MP4Remux {
             startTS:0,
             endTS:0,
         };
+
+        this._videoTmpSamples = []
+
+
     }
     generateIS() {
         let {
@@ -41,17 +43,11 @@ export default class MP4Remux {
         }
     }
     generateMS(lastTimeStamp) {
-        let videoMS = new Uint8Array(0),
-            audioMS = new Uint8Array(0);
 
 
-        if (this._audioTrack.samples.length >=2 && 
-               this._videoTrack.samples.length ) {
-            audioMS = this._remuxAudio();
-            videoMS = this._remuxVideo();
-        }
+        let audioMS = this._remuxAudio() || new Uint8Array(0);
+        let videoMS = this._remuxVideo() || new Uint8Array(0);
 
-        
         console.log("the diff time is ", this._videoTimebase - this._audioTimebase)
 
         return {
@@ -145,6 +141,8 @@ export default class MP4Remux {
 
         let moof = MP4.moof(this._audioTrack, baseDts, this._audioSeg);
 
+        this._audioTrack.samples = [];
+
         return mergeTypedArray(moof, audioMdat);
     }
     /** 
@@ -165,8 +163,8 @@ export default class MP4Remux {
 
         // travrse videoTmpSamples
         
-        videoTmpSamples.samples.forEach(sample=>{
-            if(sample.timeStamp >= endTS){
+        this._videoTmpSamples.forEach(sample=>{
+            if(sample.timeStamp <= endTS){
                 samples.push(sample)
             }else{
                 tmpBuffer.push(sample)
@@ -176,7 +174,7 @@ export default class MP4Remux {
         // travrse this._videoTrack.samples
 
         this._videoTrack.samples.forEach(sample=>{
-            if(sample.timeStamp >= endTS){
+            if(sample.timeStamp <= endTS){
                 samples.push(sample)
             }else{
                 tmpBuffer.push(sample)
@@ -186,7 +184,7 @@ export default class MP4Remux {
 
         // when the remaining samples are beyond endTS,
         // put these samples into videoTmpSamples
-        videoTmpSamples.samples = tmpBuffer;
+        this._videoTmpSamples = tmpBuffer;
         
         // calcuate the samples.length
         this._videoTrack.length = samples.reduce((sum,val)=>{
@@ -195,7 +193,6 @@ export default class MP4Remux {
 
         // resolve these effective samples into this._videoTrack.samples;
         this._videoTrack.samples = samples;
-
 
     }
     _remuxVideo() {
@@ -207,12 +204,20 @@ export default class MP4Remux {
 
         // TODO verify/test endTS logic 
 
+        if(this._videoTrack.samples.length === 0){
+            // when the videoSamples is 
+            return;
+        }
+
+
         let {
             videoMdat,
             baseDts
         } = this._remuxVideoMdat();
 
         let moof = MP4.moof(this._videoTrack, baseDts, this._videoSeq);
+
+        this._videoTrack.samples = []; // reset 
 
 
         return mergeTypedArray(moof, videoMdat);
@@ -231,6 +236,8 @@ export default class MP4Remux {
         // set the timeStamp range
         this._audioClockRange.startTS = samples[0].timeStamp;
         this._audioClockRange.endTS = samples[samples.length-1].timeStamp;
+
+
 
         samples.forEach((accSample, index) => {
             let dts = this._audioTimebase,
