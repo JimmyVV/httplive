@@ -157,7 +157,9 @@ export default class AACDemux {
 		meta.channelCount = channelConfig;
 		meta.codec = 'mp4a.40.' + audioObjectType;
 
-		meta.refSampleDuration = Math.floor(1024 / meta.audioSampleRate * meta.timescale);
+		// meta.refSampleDuration = Math.floor(1024 / meta.audioSampleRate * meta.timescale);
+		// stupid Math.floor
+		meta.refSampleDuration = 1024 / meta.audioSampleRate * meta.timescale;
 
 		console.log(meta.refSampleDuration);
 

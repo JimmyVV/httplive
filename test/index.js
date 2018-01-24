@@ -9,7 +9,7 @@ import {
 } from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('https://14-17-70-217.host.00cdn.com/xl.live-play.acgvideo.com/live-xl/778056/live_4122321_1127441.flv?wsSecret=4e505a8eeab35c360f51e1586dc03e4b&wsTime=1516717919');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_d857900880ff24ea994d7bb3fa84e979.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
@@ -33,6 +33,7 @@ httpChunked.bind('stream', (stream, type) => {
 
     // skip the subsequent IS info
     if(v_SB){
+      console.log(stream)
       return;
     }
     let {

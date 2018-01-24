@@ -15,11 +15,12 @@ export default class MP4Remux {
 
         this._videoSeq = 0;
         this._audioSeg = 0;
-        this._lastTimeStamp;
+        this._lastVideoTimeStamp;
         this._lastDuration;
 
         this._videoTimebase = 0;
         this._audioTimebase = 0;
+        this._audioSegmentDuration = 0;
 
         this._audioClockRange = {
             startTS:0,
@@ -48,7 +49,10 @@ export default class MP4Remux {
         let audioMS = this._remuxAudio() || new Uint8Array(0);
         let videoMS = this._remuxVideo() || new Uint8Array(0);
 
-        console.log("the diff time is ", this._videoTimebase - this._audioTimebase)
+        console.log("the timeBase diff time is ", this._videoTimebase - this._audioTimebase)
+        console.log("the video timeBase time is ", this._videoTimebase)
+        console.log("the timeStamp diff time is ", this._lastVideoTimeStamp - this._audioClockRange.endTS);
+
 
         return {
             audioMS,
@@ -107,16 +111,17 @@ export default class MP4Remux {
         });
 
 
-        if(tmpBuffer.length === 0 && samples.length > 0){
-            // put one samples into tmpBuffer,
-            // extract the timeStamp
-            let nextSample = samples.pop();
-            this._lastTimeStamp = nextSample.timeStamp;
-            tmpBuffer.push(nextSample);
+        // don't cache the last video samples
+        // if(tmpBuffer.length === 0 && samples.length > 0){
+        //     // put one samples into tmpBuffer,
+        //     // extract the timeStamp
+        //     let nextSample = samples.pop();
+        //     this._lastTimeStamp = nextSample.timeStamp;
+        //     tmpBuffer.push(nextSample);
 
-            // these is maybe memoery leak here.
-            // nextSample = null;
-        }
+        //     // these is maybe memoery leak here.
+        //     // nextSample = null;
+        // }
 
 
         // when the remaining samples are beyond endTS,
@@ -143,6 +148,7 @@ export default class MP4Remux {
         this._filterEffectiveVideo();
 
         // TODO verify/test endTS logic 
+    
 
         if(this._videoTrack.samples.length === 0){
             // when the videoSamples is 
@@ -168,6 +174,7 @@ export default class MP4Remux {
             track = this._videoTrack,
             meta = track.meta,
             samples = track.samples,
+            refDuration = this._audioSegmentDuration/samples.length,
             mp4Samples = [];
 
         let baseDts = this._videoTimebase;
@@ -187,17 +194,25 @@ export default class MP4Remux {
             let keyFrame = viSample.keyFrame;
             
 
-            if (samples.length > 1 && samples.length !== index + 1) {
-                // loop the samples but not the last one
-                tagDuration = samples[index + 1].timeStamp - viSample.timeStamp;
-            } else {
-                tagDuration = this._lastTimeStamp - viSample.timeStamp;
-            }
+            // don't use the timeStamp to predict tagDuration
+            // if (samples.length > 1 && samples.length !== index + 1) {
+            //     // loop the samples but not the last one
+            //     tagDuration = samples[index + 1].timeStamp - viSample.timeStamp;
+            // } else {
+            //     tagDuration = this._lastTimeStamp - viSample.timeStamp;
+            // }
+
+            tagDuration = refDuration;
+
 
             dts = this._videoTimebase;
             pts = dts + cts;
 
             this._videoTimebase += tagDuration;
+
+
+            // set the real VideoTimeStamp
+            this._lastVideoTimeStamp = viSample.timeStamp;
 
 
 
@@ -284,6 +299,9 @@ export default class MP4Remux {
             offset += sampleSize;
 
         });
+
+        // set the accumulated duration of per samples
+        this._audioSegmentDuration = this._audioTimebase - baseDts;
 
         track.samples = mp4Samples;
         this._audioSeg++;
