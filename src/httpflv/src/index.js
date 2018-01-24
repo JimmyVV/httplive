@@ -146,7 +146,7 @@ class HTTPChunked extends HeaderRead {
                 // when the remained data is not a complete tag, return;
                 break;
             }
-            
+
             // decode Flv tag
             tmpData = this._flvTag(this._chunk.slice(4));
 
@@ -220,6 +220,7 @@ class HTTPChunked extends HeaderRead {
                 this._emitter.on(name, (...args) => {
                     fn(...args)
                 })
+                
         }
     }
     bind(...args) {
