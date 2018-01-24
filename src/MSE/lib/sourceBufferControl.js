@@ -128,7 +128,6 @@ class SourceBufferControl {
 
 
             // need to remove, 
-            console.log(this._ms.duration);
         }
     }
 

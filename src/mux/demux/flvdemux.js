@@ -111,6 +111,7 @@ export default class FLVDemux extends BaseInfo {
 
         if(soundFormat === 2){
             // MP3
+            // NOOP
         }else if(soundFormat === 10){
             // AAC
             this.AAC.parse(buffer,info.timeStamp)
