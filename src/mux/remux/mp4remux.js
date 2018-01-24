@@ -226,7 +226,7 @@ export default class MP4Remux {
 
             offset += viSample.length;
         });
-        debugger
+
 
         track.samples = mp4Samples;
         this._videoSeq++;
