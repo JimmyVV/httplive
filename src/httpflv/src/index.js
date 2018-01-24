@@ -131,7 +131,6 @@ class HTTPChunked extends HeaderRead {
             // reader DataSize
             view = new DataView(this._chunk);
 
-
             // get the previous tag size
             // let prvDataSize = view.getUint32(0);
 
@@ -147,6 +146,7 @@ class HTTPChunked extends HeaderRead {
                 // when the remained data is not a complete tag, return;
                 break;
             }
+            
             // decode Flv tag
             tmpData = this._flvTag(this._chunk.slice(4));
 
