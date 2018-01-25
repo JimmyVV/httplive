@@ -10,8 +10,11 @@ import {
 let log = new Log('SourceBufferControl');
 
 class SourceBufferControl {
-    constructor(parentMediaSource, sourceBuffer, options) {
-        this._ms = parentMediaSource;
+    constructor(parent, sourceBuffer, options) {
+
+
+        this._ms = parent._ms;
+        this._video = parent._video;
 
         this._sb = sourceBuffer;
 
@@ -30,7 +33,7 @@ class SourceBufferControl {
         sourceBuffer.addEventListener('updateend', this._updateEndHandler.bind(this), false);
 
         // now, don't to release
-        // this.release();
+        this.release();
 
     }
     _updateEndHandler() {
@@ -54,9 +57,10 @@ class SourceBufferControl {
         }
 
         // check sb is clearing the buffer check the sb has enough sourceBuffer
-        if (timeRanges.length <= 2) {
+        if (!timeRanges.length) {
 
             log.w('the buffer length is not enough, ', timeRanges.length);
+
             return false;
         }
 
@@ -74,15 +78,30 @@ class SourceBufferControl {
             let timeRanges = this._sb.buffered,
                 rangesLen = timeRanges.length;
 
-            let startTime = timeRanges.start(0),
-                endTime = timeRanges.end(rangesLen - 2);
+            
 
-            console.log('clearBuffer is : ');
-            console.log('                  ', startTime,": ",endTime);
+            let startTime = timeRanges.start(0),
+                endTime = timeRanges.end(0);
+
+            let currentTime = this._video.currentTime;
+
+                        
+
+            if(currentTime < endTime){
+                endTime = currentTime-0.1;
+            }
+
+            log.w('clearBuffer is : ');
+            log.w('                  ', startTime,": ",endTime);
+            log.w('the currentTime is : ', currentTime);
+
+
 
             this
                 ._sb
                 .remove(startTime, endTime);
+
+            
 
             this.release();
         }

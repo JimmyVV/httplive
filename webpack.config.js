@@ -24,7 +24,7 @@ let config = {
             use: [{
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015',"stage-0"],
+                    presets: ['es2015'],
                     retainLines:true
                 }
             }]

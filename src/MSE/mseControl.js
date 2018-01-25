@@ -58,7 +58,7 @@ export default class MSEControl {
         if (!MediaSource.isTypeSupported(mime))
         log.e("MSE don't support this mimeType, ", mime);
 
-        let sb = new SourceBuffer(this._ms, this._ms.addSourceBuffer(mime))
+        let sb = new SourceBuffer(this, this._ms.addSourceBuffer(mime))
 
         this._sbList.push(sb);
 

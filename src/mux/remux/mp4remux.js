@@ -2,6 +2,7 @@ import MP4 from './lib/mp4_generator';
 import {
     mergeTypedArray
 } from 'lib/utils';
+import { debug } from 'util';
 
 export default class MP4Remux {
     constructor({
@@ -36,6 +37,7 @@ export default class MP4Remux {
             hasVideo,
             hasAudio
         } = this._mediaInfo;
+
         if (hasVideo && hasAudio) {
             return {
                 videoIS: MP4.initBox(this._videoTrack.meta),

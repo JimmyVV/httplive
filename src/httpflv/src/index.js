@@ -19,25 +19,28 @@ import MozChunked from '../lib/xhr-ff-chunked';
 import FetchChunked from '../lib/fetch-chunked';
 import W3CChunked from '../lib/xhr-w3c-chunked';
 
-import {detect} from 'detect-browser';
+import {
+    detect
+} from 'detect-browser';
+import { debug } from 'util';
 
 
 class HTTPChunked extends HeaderRead {
-    constructor(url = '',config) {
+    constructor(url = '', config) {
         super();
 
         let urlType = typeof url;
 
         // replace the object
-        if(urlType === 'object'){
+        if (urlType === 'object') {
             config = url;
-        }else if(urlType === 'string'){
+        } else if (urlType === 'string') {
             this._url = url;
         }
 
         this._browser = detect();
-        
-        switch(this._browser && this._browser.name){
+
+        switch (this._browser && this._browser.name) {
             case 'chrome':
                 this._xhr = new FetchChunked(config);
                 break;
@@ -45,12 +48,12 @@ class HTTPChunked extends HeaderRead {
                 this._xhr = new MozChunked(config);
                 break;
             case 'edge':
-             default:
-             throw new Error('your browser don"t support fetch API, please use modern Browser');
+            default:
+                throw new Error('your browser don"t support fetch API, please use modern Browser');
         }
- 
 
-        this._xhr.on('chunk',this.readChunk.bind(this));
+
+        this._xhr.on('chunk', this.readChunk.bind(this));
         // this._xhr.onChunkReader = this.readChunk.bind(this);
 
         this._emitter = this._xhr._emitter;
@@ -59,8 +62,8 @@ class HTTPChunked extends HeaderRead {
         this._bufferLen;
         this._readLen = 0;
 
-        this._returnArr = [];
-        this._type = 'MS';
+        this._ISArray = []; // put IS info
+        this._MSArray = []; // put MS info
 
 
         // don't automaticall trigger
@@ -68,11 +71,11 @@ class HTTPChunked extends HeaderRead {
 
 
     }
-    
-    send(url){
+
+    send(url) {
 
         console.log(this._xhr);
-        
+
         // if the param@url is undefined , use the url when init  HTTPChunked(url)
         this._xhr.send(url || this._url);
     }
@@ -85,16 +88,13 @@ class HTTPChunked extends HeaderRead {
     readChunk(chunk) {
         // reder FLV header
         this._chunk = mergeBuffer(this._chunk, chunk);
-        
+
         chunk = null;
 
         let tmpData, ab, view;
 
         this._bufferLen = this._chunk.byteLength;
         this._readLen = 0;
-        this._returnArr = [];
-
-        this._type = 'MS';
 
 
         while (this._bufferLen - this._readLen > 11) {
@@ -109,24 +109,26 @@ class HTTPChunked extends HeaderRead {
                 // reader FLV header
                 tmpData = this._flvHeader(this._chunk.slice(0, 9));
 
-                this._returnArr.push({
+                this._ISArray.push({
                     buffer: tmpData.buffer,
                     info: {
                         type: tmpData.type,
+                        desc: tmpData.desc,
                         version: tmpData.version,
                         tagOffset: tmpData.tagOffset,
                         hasAudio: tmpData.hasAudio,
                         hasVideo: tmpData.hasVideo,
                     }
                 })
+
+
                 this._readLen += 9;
                 this._chunk = this._chunk.slice(9);
 
-                this._type = 'IS';
 
                 continue;
             }
-            
+
 
             // reader DataSize
             view = new DataView(this._chunk);
@@ -134,9 +136,9 @@ class HTTPChunked extends HeaderRead {
             // get the previous tag size
             // let prvDataSize = view.getUint32(0);
 
-            this._readLen+=4; // add the 'previousTag' size
+            this._readLen += 4; // add the 'previousTag' size
 
-            if(this._bufferLen < 11 + this._readLen){
+            if (this._bufferLen < 11 + this._readLen) {
                 // confirm the dataSize is valid
                 break;
             }
@@ -150,17 +152,34 @@ class HTTPChunked extends HeaderRead {
             // decode Flv tag
             tmpData = this._flvTag(this._chunk.slice(4));
 
+            if (tmpData.desc === 'header') {
+                // save the IS info
+                this._ISArray.push({
+                    buffer: tmpData.buffer,
+                    info: {
+                        type: tmpData.type,
+                        desc: tmpData.desc,
+                        dataOffset: tmpData.dataOffset,
+                        dataSize: tmpData.dataSize,
+                        timeStamp: tmpData.timeStamp,
+                        tagLen: tmpData.tagLen
+                    }
+                });
 
-            this._returnArr.push({
-                buffer: tmpData.buffer,
-                info: {
-                    type: tmpData.type,
-                    dataOffset: tmpData.dataOffset,
-                    dataSize: tmpData.dataSize,
-                    timeStamp: tmpData.timeStamp,
-                    tagLen: tmpData.tagLen
-                }
-            });
+            }else{
+                // save MS info
+                this._MSArray.push({
+                    buffer: tmpData.buffer,
+                    info: {
+                        type: tmpData.type,
+                        desc: tmpData.desc,
+                        dataOffset: tmpData.dataOffset,
+                        dataSize: tmpData.dataSize,
+                        timeStamp: tmpData.timeStamp,
+                        tagLen: tmpData.tagLen
+                    }
+                });
+            }
 
             this._chunk = this._chunk.slice(tmpData.tagLen + 4); // prvTag size
             this._readLen += tmpData.tagLen;
@@ -168,15 +187,26 @@ class HTTPChunked extends HeaderRead {
 
         }
 
-        // detect the arr is empty, then don't return
-        if (!this._returnArr.length) return;
-
-        /**
+         /**
          * the type contain IS/MS:
          *      IS: initial Segment
          *      MS: media Segment
          */
-        this._emitter.emit(CHUNKEDSTREAM, this._returnArr, this._type);
+        if(this._ISArray.length === this._ISLength){
+
+            console.warn('get IS info !!!!!!!!!!');
+            this._emitter.emit(CHUNKEDSTREAM, this._ISArray, 'IS');
+
+            this._ISArray = [];
+        }
+
+        // detect the arr is empty, then don't return
+        if (this._MSArray.length){
+            this._emitter.emit(CHUNKEDSTREAM, this._MSArray, 'MS');
+
+            this._MSArray = [];
+        }
+        
 
 
     }
@@ -190,7 +220,7 @@ class HTTPChunked extends HeaderRead {
     retry() {
         this._xhr.retry();
     }
-   
+
     drop() {
         this._xhr.drop();
     }
@@ -202,7 +232,7 @@ class HTTPChunked extends HeaderRead {
                 })
                 break;
             case 'chunk': // pure chunk
-                this._emitter.on(CHUNKEDPROGRESS,(...args)=>{
+                this._emitter.on(CHUNKEDPROGRESS, (...args) => {
                     fn(...args)
                 })
                 break;
@@ -220,7 +250,7 @@ class HTTPChunked extends HeaderRead {
                 this._emitter.on(name, (...args) => {
                     fn(...args)
                 })
-                
+
         }
     }
     bind(...args) {
@@ -229,7 +259,7 @@ class HTTPChunked extends HeaderRead {
     on(...args) {
         this.addEventListener(...args);
     }
-   
+
 }
 
 export default HTTPChunked;
