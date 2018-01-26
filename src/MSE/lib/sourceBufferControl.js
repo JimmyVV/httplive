@@ -10,10 +10,11 @@ import {
 let log = new Log('SourceBufferControl');
 
 class SourceBufferControl {
-    constructor(parent, sourceBuffer, options) {
+    constructor(parent, sourceBuffer,type, options) {
 
 
         this._ms = parent._ms;
+        this._type = type; // string: "audio" or "video"
         this._video = parent._video;
 
         this._sb = sourceBuffer;
@@ -33,7 +34,7 @@ class SourceBufferControl {
         sourceBuffer.addEventListener('updateend', this._updateEndHandler.bind(this), false);
 
         // now, don't to release
-        this.release();
+        // this.release();
 
     }
     _updateEndHandler() {
@@ -145,9 +146,20 @@ class SourceBufferControl {
 
             this._tmpBuffer = [];
 
-
-            // need to remove, 
+            // check the timeRange status 
+            this._checkTimeRanges();
         }
+    }
+    _checkTimeRanges(){
+        let timeRanges = this._sb.buffered;
+
+        if(!timeRanges.length) return;
+
+
+        log.w('the '+ this._type + ' stream: the timeRangse length ',timeRanges.length );
+        log.w('start: ',timeRanges.start(0),' end: ', timeRanges.end(0),' currentTime:' , this._video.currentTime);
+
+
     }
 
 }

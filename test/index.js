@@ -9,7 +9,7 @@ import {
 } from 'debug/helper';
 
 
-let httpChunked = new HTTPChunked('https://xl.live-play.acgvideo.com/live-xl/663965/live_4548018_332_c521e483.flv?wsSecret=9539253918fcdd68f3d74c28bf97d0bd&wsTime=1516895448');
+let httpChunked = new HTTPChunked('http://6721.liveplay.myqcloud.com/live/6721_a730f627d566d56337a887a623bc5516.flv');
 let muxController = new MuxController();
 
 let mse = new MSE(document.getElementById('videoTag'));
@@ -43,8 +43,8 @@ httpChunked.bind('stream', (stream, type) => {
       audioMime
     } = muxController.parse(stream, type);
 
-    v_SB = mse._addSourceBuffer(videoMime);
-    a_SB = mse._addSourceBuffer(audioMime);
+    v_SB = mse._addSourceBuffer(videoMime,'video');
+    a_SB = mse._addSourceBuffer(audioMime,'audio');
     
     // concatBuffer(videoIS,100*1024);
     v_SB.appendBuffer(videoIS);

@@ -32,33 +32,11 @@ export default class MSEControl {
      * @return {Promise} resolve: the new sourcebuffer
      * @param {String} mime 
      */
-    addSourceBuffer(mime) {
-        if (typeof mime !== 'string')
-            throw new Error('addSourceBuffer(): invalid type, only receive string type, ' + mime);
-
+    _addSourceBuffer(mime,type){
         if (!MediaSource.isTypeSupported(mime))
             log.e("MSE don't support this mimeType, ", mime);
 
-        return this._msOpen()
-            .then(() => {
-
-                let sb = new SourceBuffer(this._ms, this._ms.addSourceBuffer(mime))
-
-                this._sbList.push(sb);
-
-                return sb;
-
-            })
-            .catch(err => {
-                throw new Error(err);
-            })
-
-    }
-    _addSourceBuffer(mime){
-        if (!MediaSource.isTypeSupported(mime))
-        log.e("MSE don't support this mimeType, ", mime);
-
-        let sb = new SourceBuffer(this, this._ms.addSourceBuffer(mime))
+        let sb = new SourceBuffer(this, this._ms.addSourceBuffer(mime),type);
 
         this._sbList.push(sb);
 
