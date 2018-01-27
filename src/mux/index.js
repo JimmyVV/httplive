@@ -40,7 +40,7 @@ export default class MuxController {
             if (this._audioTrack.samples.length >1 && (this._videoTrack.samples.length) >1 ) {
                 
                 let {audioMS,videoMS} = this._mp4Remux.generateMS();
-            
+                
 
                 return {
                     audioMS,videoMS

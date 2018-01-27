@@ -51,9 +51,11 @@ export default class MP4Remux {
         let audioMS = this._remuxAudio() || new Uint8Array(0);
         let videoMS = this._remuxVideo() || new Uint8Array(0);
 
-        console.log("the timeBase diff time is ", this._videoTimebase - this._audioTimebase)
-        console.log("the video timeBase time is ", this._videoTimebase)
-        console.log("the timeStamp diff time is ", this._lastVideoTimeStamp - this._audioClockRange.endTS);
+
+        // debugger diff time
+        // console.log("the timeBase diff time is ", this._videoTimebase - this._audioTimebase)
+        // console.log("the video timeBase time is ", this._videoTimebase)
+        // console.log("the timeStamp diff time is ", this._lastVideoTimeStamp - this._audioClockRange.endTS);
 
 
         return {
@@ -73,6 +75,7 @@ export default class MP4Remux {
         let moof = MP4.moof(this._audioTrack, baseDts, this._audioSeg);
 
         this._audioTrack.samples = [];
+        this._audioTrack.length = 0;
 
         return mergeTypedArray(moof, audioMdat);
     }
@@ -190,6 +193,11 @@ export default class MP4Remux {
 
             let sampleSize = viSample.slices.byteLength;
 
+
+            // debugger
+            if(viSample.keyFrame){
+                console.warn('the I frame is', viSample);
+            }
 
             videoMdat.set(viSample.slices, offset);
 

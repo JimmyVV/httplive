@@ -51,7 +51,6 @@ export default class HeaderRead {
 
 
 
-
         return {
             type: this.type[0],
             version,

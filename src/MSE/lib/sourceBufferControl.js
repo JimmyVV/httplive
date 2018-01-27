@@ -22,39 +22,34 @@ class SourceBufferControl {
         this._memory = Object.assign({}, {
             release: true,
             time: 5000,
-            maxBufferTime: 4, // the maximum of ranges.start(0) - ranges.end(0)
+            maxBufferTime: 60, // the maximum of ranges.start(0) - ranges.end(0)
             trailedTime: 2, // the maximum of currentTime behind the ranges.end(0)
             keepUpdated: true, // often fastforward currentTime to newest
+            playbackRate: 1.5, // rate-style catch up the time
         }, options);
 
         /**
          * the default is 2, the maximum is 3
          */
-        this._maxBufferTime = Math.min(this._memory.maxBufferTime, 3);
+        this._maxBufferTime = this._memory.maxBufferTime;
 
         /**
          * alwasy keep trailed time is less than the maxBufferTime
          * in order to prevent currentTime ~== start(0).
          * otherwise, the sb will only remove a little timeRanges [start,currentTime];
          */
-        this._trailedTime = Math.min(this._memory.trailedTime, this._memory.maxBufferTime - 0.5)
-
-
-        this._minBufferTime =1;
+        this._trailedTime = this._memory.trailedTime;
 
         this._keepUpdated = this._memory.keepUpdated;
 
-        this._isReleasing = false;
-        this._recursive;
-        this._releasing;
+        this._playbackRate = this._memory.playbackRate;
+
 
         this._tmpBuffer = [];
 
         sourceBuffer.addEventListener('update', () => {}, false);
         sourceBuffer.addEventListener('updateend', this._updateEndHandler.bind(this), false);
 
-        // now, don't to release
-        // this.release();
 
     }
     _updateEndHandler() {
@@ -77,6 +72,12 @@ class SourceBufferControl {
 
 
         if (this._tmpBuffer.length && !this._sb.updating) {
+            /**
+             * the length of mergeUnit8Array(this._tmpBuffer) should follow the rules:
+             *  video's maximum: 150MB
+             *  audio's maxiumu: 12MB
+             */
+
 
             this._sb.appendBuffer(mergeUnit8Array(this._tmpBuffer));
             this._tmpBuffer = [];
@@ -88,6 +89,8 @@ class SourceBufferControl {
      * if the minBufferTime is small, like 0.5s, then the video will be probably choppy.
      * so the minBufferTime shoud be in [ 0 ,trailedTime], like [0,2]
      * just like: |1--------2|3------4|, minBufferTime < (3-4), and minBufferTime < trailedTime(3-4) < maxBufferTime(1-4)
+     * 
+     * MSE internal memory is 60-120MB, 12MB for audio, 150MB for video. if it is full, it will throw error
      */
     _removeSegment() {
         // for live stream, the timeRanges.length always is 0
@@ -104,30 +107,40 @@ class SourceBufferControl {
             if (this._keepUpdated) {
                 /**
                  * seek forwards. 
-                 * the defualt value of trailedTime is 2s
+                 * the defualt value of trailedTime is 1s
                  */
                 if (currentTime < end - this._trailedTime) {
-                    currentTime = this._video.currentTime = end - this._minBufferTime;
-                }else{
-                    currentTime = currentTime - this._minBufferTime;
+                    log.w('change the rate ', this._playbackRate, 'currentTime: ', currentTime, 'end:' , end);
+                    this._video.playbackRate = this._playbackRate;
+
+                }else {
+
+
+                    /**
+                     * when the video almost catch up the end, 
+                     * then play as normal
+                     */
+                    this._video.playbackRate = 1.0;
                 }
-            }else{
-                // alwasy keep the currentTime is larger that start
-                if(currentTime < start){
-                    // the formular is (end - start)/2 + start = (end + start)/2;
-                    currentTime = this._video.currentTime = (end+start)/2 ;
-                }else{
-                    // get nearest I frame time.
-                }
+
+                
 
             }
 
+            /**
+             * check ranges between currentTime and start
+             */
 
-            log.w('the ', this._type, ' diff ranges :', currentTime - start, 'strat:', start);
+             if(currentTime - start > this._maxBufferTime){
+                
+                log.w('the ', this._type, ' diff ranges :', currentTime - start, 'strat:', start, 'end: ', end, 'currentTime: ', currentTime);
+            
+                currentTime = start + this._maxBufferTime * 0.8; // when the maxBuffer Time is 30, then remove (0,24s) ranges;
 
+                !this._sb.updating && this._sb.remove(start, currentTime);
+             }
 
-
-            !this._sb.updating && this._sb.remove(start, currentTime);
+            
 
         }
 

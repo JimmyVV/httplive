@@ -34,7 +34,6 @@ export default class FLVDemux extends BaseInfo {
             let info = chunk.info;
             switch (info.type) {
                 case this._type.header:
-
                     this._mediaInfo.hasVideo = info.hasVideo;
                     this._mediaInfo.hasAudio = info.hasAudio;
                     break;

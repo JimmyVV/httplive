@@ -191,9 +191,9 @@ class HTTPChunked extends HeaderRead {
          * the type contain IS/MS:
          *      IS: initial Segment
          *      MS: media Segment
+         * the server maybe return duplicated IS, like Header: scirpt + video + audio + video +....
          */
-        if(this._ISArray.length === this._ISLength){
-
+        if(this._ISArray.length >= this._ISLength){
             console.warn('get IS info !!!!!!!!!!');
             this._emitter.emit(CHUNKEDSTREAM, this._ISArray, 'IS');
 
@@ -202,6 +202,7 @@ class HTTPChunked extends HeaderRead {
 
         // detect the arr is empty, then don't return
         if (this._MSArray.length){
+
             this._emitter.emit(CHUNKEDSTREAM, this._MSArray, 'MS');
 
             this._MSArray = [];
