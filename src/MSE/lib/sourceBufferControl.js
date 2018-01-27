@@ -22,24 +22,27 @@ class SourceBufferControl {
         this._memory = Object.assign({}, {
             release: true,
             time: 5000,
-            maxBufferTime: 4,
-            trailedTime: 2
+            maxBufferTime: 4, // the maximum of ranges.start(0) - ranges.end(0)
+            trailedTime: 2, // the maximum of currentTime behind the ranges.end(0)
+            keepUpdated: true, // often fastforward currentTime to newest
         }, options);
 
         /**
          * the default is 2, the maximum is 3
          */
-        this._maxBufferTime = Math.min(this._memory.maxBufferTime,3); 
+        this._maxBufferTime = Math.min(this._memory.maxBufferTime, 3);
 
         /**
          * alwasy keep trailed time is less than the maxBufferTime
          * in order to prevent currentTime ~== start(0).
          * otherwise, the sb will only remove a little timeRanges [start,currentTime];
          */
-        this._trailedTime = Math.min(this._memory.trailedTime,this._memory.maxBufferTime - 0.5)
+        this._trailedTime = Math.min(this._memory.trailedTime, this._memory.maxBufferTime - 0.5)
 
 
-        this._minBufferTime = 0.5;
+        this._minBufferTime =1;
+
+        this._keepUpdated = this._memory.keepUpdated;
 
         this._isReleasing = false;
         this._recursive;
@@ -79,6 +82,13 @@ class SourceBufferControl {
             this._tmpBuffer = [];
         }
     }
+    /**
+     * you must often care about the trailedTime, maxBufferTime, minBufferTime
+     * when you set some param, u should alwasy keep that "end - currentTime" > "minBufferTime"
+     * if the minBufferTime is small, like 0.5s, then the video will be probably choppy.
+     * so the minBufferTime shoud be in [ 0 ,trailedTime], like [0,2]
+     * just like: |1--------2|3------4|, minBufferTime < (3-4), and minBufferTime < trailedTime(3-4) < maxBufferTime(1-4)
+     */
     _removeSegment() {
         // for live stream, the timeRanges.length always is 0
 
@@ -88,19 +98,36 @@ class SourceBufferControl {
             currentTime = this._video.currentTime || 0,
             rangesDur = end - start;
 
-        if(rangesDur > this._maxBufferTime){
+        if (rangesDur > this._maxBufferTime) {
 
-            /**
-             * seek forwards. 
-             * the defualt value of trailedTime is 2s
-             */
-            if(currentTime < end - this._trailedTime){
-                currentTime = this._video.currentTime = end - this._minBufferTime;
+
+            if (this._keepUpdated) {
+                /**
+                 * seek forwards. 
+                 * the defualt value of trailedTime is 2s
+                 */
+                if (currentTime < end - this._trailedTime) {
+                    currentTime = this._video.currentTime = end - this._minBufferTime;
+                }else{
+                    currentTime = currentTime - this._minBufferTime;
+                }
+            }else{
+                // alwasy keep the currentTime is larger that start
+                if(currentTime < start){
+                    // the formular is (end - start)/2 + start = (end + start)/2;
+                    currentTime = this._video.currentTime = (end+start)/2 ;
+                }else{
+                    // get nearest I frame time.
+                }
+
             }
 
-            log.w('the ', this._type,' diff ranges :', currentTime - start, 'strat:', start);
 
-            !this._sb.updating && this._sb.remove(start,currentTime);
+            log.w('the ', this._type, ' diff ranges :', currentTime - start, 'strat:', start);
+
+
+
+            !this._sb.updating && this._sb.remove(start, currentTime);
 
         }
 
