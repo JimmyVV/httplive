@@ -100,7 +100,7 @@ class SourceBufferControl {
 
         if (rangesDur > this._maxBufferTime) {
 
-
+ 
             if (this._keepUpdated) {
                 /**
                  * seek forwards. 
