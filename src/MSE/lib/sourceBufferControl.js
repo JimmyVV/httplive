@@ -10,7 +10,7 @@ import {
 let log = new Log('SourceBufferControl');
 
 class SourceBufferControl {
-    constructor(parent, sourceBuffer,type, options) {
+    constructor(parent, sourceBuffer, type, options) {
 
 
         this._ms = parent._ms;
@@ -21,8 +21,25 @@ class SourceBufferControl {
 
         this._memory = Object.assign({}, {
             release: true,
-            time: 5000
+            time: 5000,
+            maxBufferTime: 4,
+            trailedTime: 2
         }, options);
+
+        /**
+         * the default is 2, the maximum is 3
+         */
+        this._maxBufferTime = Math.min(this._memory.maxBufferTime,3); 
+
+        /**
+         * alwasy keep trailed time is less than the maxBufferTime
+         * in order to prevent currentTime ~== start(0).
+         * otherwise, the sb will only remove a little timeRanges [start,currentTime];
+         */
+        this._trailedTime = Math.min(this._memory.trailedTime,this._memory.maxBufferTime - 0.5)
+
+
+        this._minBufferTime = 0.5;
 
         this._isReleasing = false;
         this._recursive;
@@ -39,128 +56,57 @@ class SourceBufferControl {
     }
     _updateEndHandler() {
         // append rest buffer
+        this._pushSegment();
+    }
+
+    appendBuffer(buffer) {
+
+        this._tmpBuffer.push(buffer);
+
+        this._pushSegment();
+
+    }
+    _pushSegment() {
+
+        if (this._sb.buffered.length)
+            this._removeSegment()
+
+
+
         if (this._tmpBuffer.length && !this._sb.updating) {
 
             this._sb.appendBuffer(mergeUnit8Array(this._tmpBuffer));
             this._tmpBuffer = [];
         }
     }
-    
-    _couldRelease() {
-        let timeRanges = this._sb.buffered;
+    _removeSegment() {
+        // for live stream, the timeRanges.length always is 0
 
-           // when the duration is NaN, throw an error. it couldn't contiue to release
-        // memory
-        if (this._ms.duration === NaN) {
-            log.e('the mediaSource duration is NaN, ' + this._ms);
+        let timeRanges = this._sb.buffered,
+            start = timeRanges.start(0),
+            end = timeRanges.end(0),
+            currentTime = this._video.currentTime || 0,
+            rangesDur = end - start;
 
-            return false;
-        }
+        if(rangesDur > this._maxBufferTime){
 
-        // check sb is clearing the buffer check the sb has enough sourceBuffer
-        if (!timeRanges.length) {
-
-            log.w('the buffer length is not enough, ', timeRanges.length);
-
-            return false;
-        }
-
-     
-        // when is releasing && updaing, then quit release memory
-        return !(this._isReleasing || this._sb.updating);
-
-    }
-    clearBuffer() {
-        clearTimeout(this._releasing);
-
-        if (this._sb.updating) {
-            this._releasing = setTimeout(this.clearBuffer.bind(this), 0);
-        } else {
-            let timeRanges = this._sb.buffered,
-                rangesLen = timeRanges.length;
-
-            
-
-            let startTime = timeRanges.start(0),
-                endTime = timeRanges.end(0);
-
-            let currentTime = this._video.currentTime;
-
-                        
-
-            if(currentTime < endTime){
-                endTime = currentTime-0.1;
+            /**
+             * seek forwards. 
+             * the defualt value of trailedTime is 2s
+             */
+            if(currentTime < end - this._trailedTime){
+                currentTime = this._video.currentTime = end - this._minBufferTime;
             }
 
-            log.w('clearBuffer is : ');
-            log.w('                  ', startTime,": ",endTime);
-            log.w('the currentTime is : ', currentTime);
+            log.w('the ', this._type,' diff ranges :', currentTime - start, 'strat:', start);
 
+            !this._sb.updating && this._sb.remove(start,currentTime);
 
-
-            this
-                ._sb
-                .remove(startTime, endTime);
-
-            
-
-            this.release();
         }
 
-    }
-    release() {
-
-        // when the duration is NaN, throw an error. it couldn't contiue to release
-        // memory
-        if (this._ms.duration === NaN) {
-            console.error('the mediaSource duration is NaN, ' + this._ms);
-        }
-
-        if (!this._couldRelease()) {
-            clearTimeout(this._recursive); // prevent dev calling release() fn repeatedly
-            this._recursive = setTimeout(this.release.bind(this), this._memory.time);
-        }else{
-            this.clearBuffer();
-        }
-
-        
-    }
-    _updateEnding() {
-        return new Promise((res, rej) => {
-            if (this._sb.updating === false) return res();
-
-            var fn = (e) => {
-                res();
-                this._sb.removeEventListener('updateend', fn);
-            }
-            this._sb.addEventListener('updateend', fn.bind(this), false);
-        })
-    }
-    appendBuffer(buffer) {
-
-        this._tmpBuffer.push(buffer)
-
-        if (!this._sb.updating) {
-
-            this._sb.appendBuffer(mergeUnit8Array(this._tmpBuffer));
-
-            this._tmpBuffer = [];
-
-            // check the timeRange status 
-            this._checkTimeRanges();
-        }
-    }
-    _checkTimeRanges(){
-        let timeRanges = this._sb.buffered;
-
-        if(!timeRanges.length) return;
-
-
-        log.w('the '+ this._type + ' stream: the timeRangse length ',timeRanges.length );
-        log.w('start: ',timeRanges.start(0),' end: ', timeRanges.end(0),' currentTime:' , this._video.currentTime);
-
 
     }
+
 
 }
 

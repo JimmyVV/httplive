@@ -4,7 +4,7 @@ import Log from 'lib/log';
 let log = new Log('MSEControl');
 
 export default class MSEControl {
-    constructor(video) {
+    constructor(video,options) {
         this._ms = new MediaSource();
         this._video = video;
         this._SUPPORT = this._detect();
