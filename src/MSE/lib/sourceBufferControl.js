@@ -64,10 +64,41 @@ class SourceBufferControl {
         this._pushSegment();
 
     }
+    _catchUpTime() {
+        if (this._keepUpdated) {
+            let currentTime = this._video.currentTime,
+                end = this._sb.buffered.end(0);
+
+            /**
+             * seek forwards. 
+             * the defualt value of trailedTime is 1s
+             */
+            if (currentTime < end - this._trailedTime) {
+                log.w('change the rate ', this._playbackRate, 'currentTime: ', currentTime, 'end:', end);
+                this._video.playbackRate = this._playbackRate;
+
+            } else {
+
+
+                /**
+                 * when the video almost catch up the end, 
+                 * then play as normal
+                 */
+                this._video.playbackRate = 1.0;
+            }
+
+
+
+        }
+    }
     _pushSegment() {
 
-        if (this._sb.buffered.length)
-            this._removeSegment()
+        if (this._sb.buffered.length){
+            // star to play
+            this._removeSegment();
+            this._catchUpTime();
+
+        }
 
 
 
@@ -98,51 +129,24 @@ class SourceBufferControl {
         let timeRanges = this._sb.buffered,
             start = timeRanges.start(0),
             end = timeRanges.end(0),
-            currentTime = this._video.currentTime || 0,
-            rangesDur = end - start;
+            currentTime = this._video.currentTime || 0;
 
-        if (rangesDur > this._maxBufferTime) {
+        /**
+         * check ranges between currentTime and start
+         */
 
- 
-            if (this._keepUpdated) {
-                /**
-                 * seek forwards. 
-                 * the defualt value of trailedTime is 1s
-                 */
-                if (currentTime < end - this._trailedTime) {
-                    log.w('change the rate ', this._playbackRate, 'currentTime: ', currentTime, 'end:' , end);
-                    this._video.playbackRate = this._playbackRate;
+        if (currentTime - start > this._maxBufferTime) {
 
-                }else {
+            log.w('the ', this._type, ' diff ranges :', currentTime - start, 'strat:', start, 'end: ', end, 'currentTime: ', currentTime);
 
+            currentTime = start + this._maxBufferTime * 0.8; // when the maxBuffer Time is 30, then remove (0,24s) ranges;
 
-                    /**
-                     * when the video almost catch up the end, 
-                     * then play as normal
-                     */
-                    this._video.playbackRate = 1.0;
-                }
-
-                
-
-            }
-
-            /**
-             * check ranges between currentTime and start
-             */
-
-             if(currentTime - start > this._maxBufferTime){
-                
-                log.w('the ', this._type, ' diff ranges :', currentTime - start, 'strat:', start, 'end: ', end, 'currentTime: ', currentTime);
-            
-                currentTime = start + this._maxBufferTime * 0.8; // when the maxBuffer Time is 30, then remove (0,24s) ranges;
-
-                !this._sb.updating && this._sb.remove(start, currentTime);
-             }
-
-            
-
+            !this._sb.updating && this._sb.remove(start, currentTime);
         }
+
+
+
+
 
 
     }
