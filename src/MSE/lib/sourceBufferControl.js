@@ -88,13 +88,12 @@ class SourceBufferControl {
             }
 
 
-
         }
     }
     _pushSegment() {
 
         if (this._sb.buffered.length){
-            // star to play
+            // start to play
             this._removeSegment();
             this._catchUpTime();
 
@@ -143,10 +142,6 @@ class SourceBufferControl {
 
             !this._sb.updating && this._sb.remove(start, currentTime);
         }
-
-
-
-
 
 
     }

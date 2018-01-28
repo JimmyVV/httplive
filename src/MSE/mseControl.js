@@ -32,7 +32,7 @@ export default class MSEControl {
      * @return {Promise} resolve: the new sourcebuffer
      * @param {String} mime 
      */
-    _addSourceBuffer(mime,type){
+    addSourceBuffer(mime,type){
         if (!MediaSource.isTypeSupported(mime))
             log.e("MSE don't support this mimeType, ", mime);
 

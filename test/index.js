@@ -43,8 +43,8 @@ httpChunked.bind('stream', (stream, type) => {
       audioMime
     } = muxController.parse(stream, type);
 
-    v_SB = mse._addSourceBuffer(videoMime,'video');
-    a_SB = mse._addSourceBuffer(audioMime,'audio');
+    v_SB = mse.addSourceBuffer(videoMime,'video');
+    a_SB = mse.addSourceBuffer(audioMime,'audio');
     
     // concatBuffer(videoIS,100*1024);
     v_SB.appendBuffer(videoIS);
@@ -61,7 +61,6 @@ httpChunked.bind('stream', (stream, type) => {
     audioMS && a_SB.appendBuffer(audioMS);
     videoMS && v_SB.appendBuffer(videoMS);
 
-    // videoMS && concatBuffer(videoMS,15000*1024);
     document.getElementById('videoTag').play();
   }
 
