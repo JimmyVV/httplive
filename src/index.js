@@ -4,11 +4,11 @@ import MSE from 'MSE/mseControl';
 import Log from 'lib/log';
 
 
-const log = new Log("AV");
+const log = new Log("AVFLV");
 /**
  * no-worker version
  */
-export default class AV {
+export default class AVFLV {
     /**
      * the entry of av.js
      * @param {Object} params 
@@ -56,8 +56,7 @@ export default class AV {
         this._httpChunked.send(url);
     }
     _chunkReader(stream, type) {
-
-
+        
         if (type === 'IS') {
             this._appendIS(stream, type);
         } else {
@@ -90,7 +89,6 @@ export default class AV {
             audioMS,
             videoMS
         } = this._muxController.parse(stream, type);
-
 
         audioMS && this._a_SB.appendBuffer(audioMS);
         videoMS && this._v_SB.appendBuffer(videoMS);

@@ -7,6 +7,7 @@ const COMPILE = (process.env.NODE_ENV === 'compile');
 
 let config = {
     devtool: 'cheap-module-eval-source-map',
+    // devtool:'no-sourcem-map',
     context: path.join(__dirname),
     entry: {
         index: path.join(__dirname, 'test')
@@ -20,7 +21,7 @@ let config = {
     },
     module: {
         rules: [{
-            test: /\.(js|jsx)$/,
+            test: /((?!worker).)*\.(js|jsx)$/,
             use: [{
                 loader: 'babel-loader',
                 query: {

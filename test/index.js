@@ -1,4 +1,4 @@
-import AVFLV from '../src';
+import AVFLV from '../src/webpack-worker';
 
 
 let flv = new AVFLV({
@@ -6,7 +6,7 @@ let flv = new AVFLV({
 });
 
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_947f66d8b5a03e2466833e06d1a22c91.flv');
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_5e2d49f13faecef438914759e15d4c8f.flv');
 
 setTimeout(() => {
   // flv.player.retry();
