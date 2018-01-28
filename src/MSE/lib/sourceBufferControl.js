@@ -72,7 +72,7 @@ class SourceBufferControl {
              * the defualt value of trailedTime is 1s
              */
             if (currentTime < end - this._trailedTime) {
-                log.w('change the rate ', this._playbackRate, 'currentTime: ', currentTime, 'end:', end);
+                // log.w('change the rate ', this._playbackRate, 'currentTime: ', currentTime, 'end:', end);
                 this._video.playbackRate = this._playbackRate;
 
             } else {

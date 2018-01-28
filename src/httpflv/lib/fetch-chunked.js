@@ -58,16 +58,14 @@ export default class FetchChunked extends BaseHeader {
 
         console.log("FETCH SEND url ", url);
         
-        window.fetch(url, {
+        fetch(url, {
                 mode: this._cors
             })
             .then(res => {
-
                 if (res.ok && (res.status >= 200 && res.status <= 299)) {
 
                     // this._xhr = res;
-
-                    return this._readerTmpFn.call(this,res.body.getReader());
+                    return this._readerTmpFn(res.body.getReader());
                 } else {
                     this._emit(CHUNKEDEND);
                 }
@@ -86,7 +84,6 @@ export default class FetchChunked extends BaseHeader {
             })
     }
     _readerTmpFn(reader) {
-
         return reader.read().then(({done,value})=>{
             if (this._CANCEL) {
                 if (!done) {
@@ -96,7 +93,6 @@ export default class FetchChunked extends BaseHeader {
                         reader.releaseLock();
 
                         this._emit(HTTPCANCEL); // indicate that drop() fn when to resolve the promise
-    
                         this._emit(CHUNKEDEND);
     
                     } catch (error) {
@@ -108,14 +104,11 @@ export default class FetchChunked extends BaseHeader {
             }
     
             if (done) {
-                console.log('====================================');
-                console.log('the chunked connection has stopped');
-                console.log('====================================');
-    
                 this._emit(CHUNKEDEND);
                 return;
             }
 
+            
             this._emit(CHUNKEDPROGRESS, value.buffer);
 
             // resolve the memory leak
@@ -130,8 +123,10 @@ export default class FetchChunked extends BaseHeader {
             console.error(err);
         });
     }
-    retry() {
+    retry(url) {
         console.log('retry to connect the url,', this._url);
+
+        this._url = url || this._url;
 
         if (this._ERROR) {
             return this.send(this._url);
@@ -139,6 +134,7 @@ export default class FetchChunked extends BaseHeader {
 
         this.drop()
             .then(() => {
+                this._CANCEL = false;
                 this.send(this._url);
             })
     }
@@ -153,15 +149,7 @@ export default class FetchChunked extends BaseHeader {
         })
 
     }
-    replace(url) {
-        console.log('replace the url: ', url);
-
-        this.drop()
-            .then(() => {
-                this.send(url);
-            })
-
-    }
+    
     _init() {
         this._CANCEL = false;
         this._ERROR = false;

@@ -37,8 +37,11 @@ export default class HeaderRead {
         this._hasVideo = hasVideo;
         this._hasAudio = hasAudio;
 
-        hasAudio && this._ISLength++;
-        hasVideo && this._ISLength++;
+        if(hasAudio && hasVideo){
+            this._ISLength = 4;
+        }else{
+            this._ISLength = 3; // nothing
+        }
 
         /**
          * some data stream is unstandard,

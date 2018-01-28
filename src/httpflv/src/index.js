@@ -10,10 +10,7 @@ import {
     mergeBuffer
 } from 'lib/utils';
 import HeaderRead from '../lib/header';
-
-import {
-    stop
-} from 'debug/helper';
+import Log from 'lib/log'
 
 import MozChunked from '../lib/xhr-ff-chunked';
 import FetchChunked from '../lib/fetch-chunked';
@@ -24,6 +21,8 @@ import {
 } from 'detect-browser';
 import { debug } from 'util';
 
+
+const log = new Log('HTTPChunked');
 
 class HTTPChunked extends HeaderRead {
     constructor(url = '', config) {
@@ -183,7 +182,6 @@ class HTTPChunked extends HeaderRead {
             this._chunk = this._chunk.slice(tmpData.tagLen + 4); // prvTag size
             this._readLen += tmpData.tagLen;
 
-
         }
 
          /**
@@ -215,9 +213,15 @@ class HTTPChunked extends HeaderRead {
      * @param {String} url: replace the origin url to a new url Object
      */
     replace(url) {
-        this._xhr.replace(url);
+        // reset the length
+        this._chunk = new ArrayBuffer(0);
+
+        this._xhr.retry(url);
     }
     retry() {
+        // reset the this._chunk
+        this._chunk = new ArrayBuffer(0);
+
         this._xhr.retry();
     }
 

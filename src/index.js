@@ -37,18 +37,27 @@ export default class AV {
         this._video.addEventListener('canplaythrough', () => {
             this._video.play();
         }, false);
+        this._video.addEventListener('error', function(e){
+            console.error(e.target.error);
+        }, false);
+    
 
         // only cache one IS info
         this._v_SB;
         this._a_SB;
 
-        this._httpChunked.on('stream',this._chunkReader.bind(this));
+        this._httpChunked.on('stream', this._chunkReader.bind(this));
 
+    }
+    get player(){
+        return this._httpChunked;
     }
     send(url) {
         this._httpChunked.send(url);
     }
     _chunkReader(stream, type) {
+
+
         if (type === 'IS') {
             this._appendIS(stream, type);
         } else {
@@ -78,13 +87,18 @@ export default class AV {
     }
     _appendMS(stream, type) {
         let {
-            audioMS,videoMS
-          } = this._muxController.parse(stream, type);
-      
-      
-          audioMS && this._a_SB.appendBuffer(audioMS);
-          videoMS && this._v_SB.appendBuffer(videoMS);
+            audioMS,
+            videoMS
+        } = this._muxController.parse(stream, type);
+
+
+        audioMS && this._a_SB.appendBuffer(audioMS);
+        videoMS && this._v_SB.appendBuffer(videoMS);
     }
+}
 
-
+export {
+    HTTPChunked,
+    MuxController,
+    MSE,
 }
