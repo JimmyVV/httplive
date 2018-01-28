@@ -10,7 +10,7 @@ import {
 let log = new Log('SourceBufferControl');
 
 class SourceBufferControl {
-    constructor(parent, sourceBuffer, type, options) {
+    constructor(parent, sourceBuffer, type) {
 
 
         this._ms = parent._ms;
@@ -19,30 +19,28 @@ class SourceBufferControl {
 
         this._sb = sourceBuffer;
 
-        this._memory = Object.assign({}, {
-            release: true,
-            time: 5000,
+        this._options = Object.assign({}, {
             maxBufferTime: 60, // the maximum of ranges.start(0) - ranges.end(0)
             trailedTime: 2, // the maximum of currentTime behind the ranges.end(0)
             keepUpdated: true, // often fastforward currentTime to newest
             playbackRate: 1.5, // rate-style catch up the time
-        }, options);
+        }, parent._options);
 
         /**
          * the default is 2, the maximum is 3
          */
-        this._maxBufferTime = this._memory.maxBufferTime;
+        this._maxBufferTime = this._options.maxBufferTime;
 
         /**
          * alwasy keep trailed time is less than the maxBufferTime
          * in order to prevent currentTime ~== start(0).
          * otherwise, the sb will only remove a little timeRanges [start,currentTime];
          */
-        this._trailedTime = this._memory.trailedTime;
+        this._trailedTime = this._options.trailedTime;
 
-        this._keepUpdated = this._memory.keepUpdated;
+        this._keepUpdated = this._options.keepUpdated;
 
-        this._playbackRate = this._memory.playbackRate;
+        this._playbackRate = this._options.playbackRate;
 
 
         this._tmpBuffer = [];
