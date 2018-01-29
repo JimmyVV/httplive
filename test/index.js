@@ -1,5 +1,5 @@
-// import AVFLV from '../src/webpack-worker';
-import AVFLV from '../src';
+import AVFLV from '../src/webpack-worker';
+// import AVFLV from '../src';
 import { log } from 'util';
 
 let video = document.getElementById('videoTag');
@@ -17,7 +17,7 @@ video.addEventListener('error',e=>{
 },false);
 
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_5e3c6119e565aee3024e859508d5b4a1.flv');
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_6ad2056fa9cebeed4dffed9fcf6b98fe.flv');
 
 flv.on('info',msg=>{
   console.log('info',msg);

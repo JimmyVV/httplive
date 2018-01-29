@@ -3,8 +3,12 @@ import worker from 'webworkify-webpack'
 import MSE from 'MSE/mseControl';
 import {RETRYURL,FETCHURL,InitialSeg,MediaSeg} from './lib/constants';
 import Log from 'lib/log';
+import Mitt from 'lib/mitt';
 
 const log = new Log("AVFLV");
+
+const INFO = 'info'; // send back some stream info, like video.heigth/width
+const SYNC = 'sync'; // provide some timeStamp and timebase of video/audio
 
 export default class AVFLV{
     constructor(params){
@@ -21,6 +25,9 @@ export default class AVFLV{
         // only cache one IS info
         this._v_SB;
         this._a_SB;
+
+        this._emitter = new Mitt;
+
     }
     _errorHandler(e){
         throw new Error(e.message + " (" + e.filename + ":" + e.lineno + ")");
@@ -48,7 +55,16 @@ export default class AVFLV{
             audioIS,
             videoMime,
             audioMime,
-        }  = data;
+            mediaInfo,
+        } = data;
+
+
+         // IntialSegment Info
+         this._emitter.emit(INFO, {
+            mediaInfo,
+            videoMime,
+            audioMime,
+        });
 
         this._v_SB = this._mse.addSourceBuffer(videoMime, 'video');
         this._a_SB = this._mse.addSourceBuffer(audioMime, 'audio');
@@ -61,11 +77,29 @@ export default class AVFLV{
     _appendMS(data){
         let {
             audioMS,
-            videoMS
+            videoMS,
+            videoTimebase,
+            audioTimebase,
+            diffTimebase,
+            videoTimeStamp,
+            audioTimeStamp,
         } = data;
 
-        audioMS && this._a_SB.appendBuffer(audioMS);
-        videoMS && this._v_SB.appendBuffer(videoMS);
+        if(audioMS && videoMS){
+
+            this._a_SB.appendBuffer(audioMS);
+            this._v_SB.appendBuffer(videoMS);
+
+            // MediaSegment timeStamp Info
+            this._emitter.emit(SYNC, {
+                videoTimebase,
+                audioTimebase,
+                diffTimebase,
+                videoTimeStamp,
+                audioTimeStamp,
+            });
+
+        }
     }
     send(url){
         this._worker.postMessage({
@@ -77,6 +111,30 @@ export default class AVFLV{
         this._worker.postMessage({
             event:RETRYURL,
         })
+    }
+    addEventListener(name, fn) {
+        switch (name) {
+            case INFO:
+                this._emitter.on(INFO, (...args) => {
+                    fn(...args)
+                })
+                break;
+            case SYNC:
+                this._emitter.on(SYNC, (...args) => {
+                    fn(...args)
+                })
+                break;
+            default:
+                this._emitter.on(name, (...args) => {
+                    fn(...args)
+                })
+        }
+    }
+    bind(...args) {
+        this.addEventListener(...args);
+    }
+    on(...args) {
+        this.addEventListener(...args);
     }
 }
 
