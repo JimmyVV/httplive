@@ -53,6 +53,9 @@ export default class AVFLV {
     send(url) {
         this._httpChunked.send(url);
     }
+    retry(){
+        this._httpChunked.retry();
+    }
     _chunkReader(stream, type) {
 
         if (type === 'IS') {

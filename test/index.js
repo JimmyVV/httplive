@@ -1,10 +1,10 @@
-// import AVFLV from '../src/webpack-worker';
-import AVFLV from '../src';
+// import HTTPLive from '../src/webpack-worker';
+import HTTPLive from '../src';
 import { log } from 'util';
 
 let video = document.getElementById('videoTag');
 
-let flv = new AVFLV({
+let flv = new HTTPLive({
   video
 });
 
