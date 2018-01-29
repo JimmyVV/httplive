@@ -1,5 +1,5 @@
-import AVFLV from '../src/webpack-worker';
-// import AVFLV from '../src';
+// import AVFLV from '../src/webpack-worker';
+import AVFLV from '../src';
 import { log } from 'util';
 
 let video = document.getElementById('videoTag');

@@ -11,9 +11,10 @@ import {
 import HeaderRead from '../lib/header';
 import Log from 'lib/log'
 
-import MozChunked from '../lib/xhr-ff-chunked';
 import FetchChunked from '../lib/fetch-chunked';
+import MozChunked from '../lib/xhr-ff-chunked';
 import W3CChunked from '../lib/xhr-w3c-chunked';
+import MSChunked from '../lib/xhr-ms-chunked';
 
 import {
     detect
@@ -40,12 +41,14 @@ class HTTPChunked extends HeaderRead {
 
         switch (this._browser && this._browser.name) {
             case 'chrome':
+            case "safari":
                 this._xhr = new FetchChunked(config);
                 break;
             case 'firefox':
                 this._xhr = new MozChunked(config);
                 break;
             case 'edge':
+                this._xhr = new MSChunked(config);
             default:
                 throw new Error('your browser don"t support fetch API, please use modern Browser');
         }

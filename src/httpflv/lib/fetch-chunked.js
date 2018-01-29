@@ -50,6 +50,8 @@ export default class FetchChunked extends BaseHeader {
 
         this._CANCEL = false;
         this._ERROR = false;
+        this._cors = config.cors || 'cors';
+
         this._reader;
         console.log("FETCH chunked");
     }
@@ -57,9 +59,11 @@ export default class FetchChunked extends BaseHeader {
         this._url = url;
 
         console.log("FETCH SEND url ", url);
-        
+
         fetch(url, {
-                mode: this._cors
+                mode: this._cors,
+                referrerPolicy: 'no-referrer-when-downgrade',
+                cache: 'default',
             })
             .then(res => {
                 if (res.ok && (res.status >= 200 && res.status <= 299)) {
@@ -80,7 +84,7 @@ export default class FetchChunked extends BaseHeader {
                 this._emit(CHUNKEDERR, err);
                 this._emit(CHUNKEDEND);
 
-                console.error(err);
+                throw new Error(err);
             })
     }
     _readerTmpFn(reader) {

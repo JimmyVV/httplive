@@ -85,25 +85,15 @@ export default class XHRMozChunked extends BaseHeader{
 
     }
     _onError(e){
-        clearTimeout(this._retryTimer);
-
-        this._retryTimer = this._retry >0 && setTimeout(() => {
-            this.retry();
-        }, 3000);
-
-        this._retry--; // only retry 
-
         throw new Error(e);
     }
     drop(){
         this._xhr.abort();
     }
     retry(){
-        this.drop();
         this.send(this._url);
     }
     replace(url){
-        this.drop();
         this.send(url);
     }
 }
