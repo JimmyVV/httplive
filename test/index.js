@@ -1,12 +1,33 @@
-import AVFLV from '../src/webpack-worker';
+// import AVFLV from '../src/webpack-worker';
+import AVFLV from '../src';
+import { log } from 'util';
 
+let video = document.getElementById('videoTag');
 
 let flv = new AVFLV({
-  video:document.getElementById('videoTag')
+  video
 });
 
+video.addEventListener('canplaythrough',()=>{
+  video.play();
+},false);
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_5e2d49f13faecef438914759e15d4c8f.flv');
+video.addEventListener('error',e=>{
+  throw new Error(e);
+},false);
+
+
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_5e3c6119e565aee3024e859508d5b4a1.flv');
+
+flv.on('info',msg=>{
+  console.log('info',msg);
+})
+
+flv.on('sync',msg=>{
+  console.log('sync',msg);
+})
+
+
 
 setTimeout(() => {
   // flv.player.retry();

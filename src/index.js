@@ -1,7 +1,11 @@
 import HTTPChunked from 'httpflv/src';
 import MuxController from 'mux';
 import MSE from 'MSE/mseControl';
+import Mitt from 'lib/mitt';
 import Log from 'lib/log';
+
+const INFO = 'info'; // send back some stream info, like video.heigth/width
+const SYNC = 'sync'; // provide some timeStamp and timebase of video/audio
 
 
 const log = new Log("AVFLV");
@@ -34,13 +38,7 @@ export default class AVFLV {
         this._mse = new MSE(this._video, this._mseOptions);
         this._muxController = new MuxController();
 
-        this._video.addEventListener('canplaythrough', () => {
-            this._video.play();
-        }, false);
-        this._video.addEventListener('error', function(e){
-            console.error(e.target.error);
-        }, false);
-    
+        this._emitter = new Mitt;
 
         // only cache one IS info
         this._v_SB;
@@ -49,14 +47,14 @@ export default class AVFLV {
         this._httpChunked.on('stream', this._chunkReader.bind(this));
 
     }
-    get player(){
+    get player() {
         return this._httpChunked;
     }
     send(url) {
         this._httpChunked.send(url);
     }
     _chunkReader(stream, type) {
-        
+
         if (type === 'IS') {
             this._appendIS(stream, type);
         } else {
@@ -75,8 +73,16 @@ export default class AVFLV {
             videoIS,
             audioIS,
             videoMime,
-            audioMime
+            audioMime,
+            mediaInfo,
         } = this._muxController.parse(stream, type);
+
+        // IntialSegment Info
+        this._emitter.emit(INFO, {
+            mediaInfo,
+            videoMime,
+            audioMime,
+        });
 
         this._v_SB = this._mse.addSourceBuffer(videoMime, 'video');
         this._a_SB = this._mse.addSourceBuffer(audioMime, 'audio');
@@ -87,12 +93,58 @@ export default class AVFLV {
     _appendMS(stream, type) {
         let {
             audioMS,
-            videoMS
+            videoMS,
+            videoTimebase,
+            audioTimebase,
+            diffTimebase,
+            videoTimeStamp,
+            audioTimeStamp,
         } = this._muxController.parse(stream, type);
 
-        audioMS && this._a_SB.appendBuffer(audioMS);
-        videoMS && this._v_SB.appendBuffer(videoMS);
+       
+
+        if(audioMS && videoMS){
+
+            this._a_SB.appendBuffer(audioMS);
+            this._v_SB.appendBuffer(videoMS);
+
+            // MediaSegment timeStamp Info
+            this._emitter.emit(SYNC, {
+                videoTimebase,
+                audioTimebase,
+                diffTimebase,
+                videoTimeStamp,
+                audioTimeStamp,
+            });
+
+        }
+
     }
+    addEventListener(name, fn) {
+        switch (name) {
+            case INFO:
+                this._emitter.on(INFO, (...args) => {
+                    fn(...args)
+                })
+                break;
+            case SYNC:
+                this._emitter.on(SYNC, (...args) => {
+                    fn(...args)
+                })
+                break;
+            default:
+                this._emitter.on(name, (...args) => {
+                    fn(...args)
+                })
+        }
+    }
+    bind(...args) {
+        this.addEventListener(...args);
+    }
+    on(...args) {
+        this.addEventListener(...args);
+    }
+
 }
 
 export {

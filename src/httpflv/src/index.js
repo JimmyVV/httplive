@@ -1,4 +1,3 @@
-import Mitt from 'lib/mitt';
 import {
     HTTPCANCEL,
     CHUNKEDSTREAM,

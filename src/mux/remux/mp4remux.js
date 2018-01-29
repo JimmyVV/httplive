@@ -41,7 +41,8 @@ export default class MP4Remux {
         if (hasVideo && hasAudio) {
             return {
                 videoIS: MP4.initBox(this._videoTrack.meta),
-                audioIS: MP4.initBox(this._audioTrack.meta)
+                audioIS: MP4.initBox(this._audioTrack.meta),
+                mediaInfo:Object.assign({},this._mediaInfo),
             };
         }
     }
@@ -60,7 +61,12 @@ export default class MP4Remux {
 
         return {
             audioMS,
-            videoMS
+            videoMS,
+            videoTimebase:this._videoTimebase, // internal clockTime
+            audioTimebase: this._audioTimebase,
+            diffTimebase: this._videoTimebase - this._audioTimebase,
+            videoTimeStamp: this._lastVideoTimeStamp, // referer clockTime
+            audioTimeStamp: this._audioClockRange.endTS,
         }
 
     }

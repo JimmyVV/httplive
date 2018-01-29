@@ -15,22 +15,14 @@ export default class AVFLV{
 
         this._mse = new MSE(this._video, this._mseOptions);
 
-        this._video.addEventListener('canplaythrough', () => {
-            this._video.play();
-        }, false);
-        this._video.addEventListener('error', function(e){
-            console.error(e.target.error);
-        }, false);
-
         this._worker.addEventListener('message',this._messageHandler.bind(this));
-        // this._worker.addEventListener('error',this._errorHandler.bind(this));
+        this._worker.addEventListener('error',this._errorHandler.bind(this));
 
         // only cache one IS info
         this._v_SB;
         this._a_SB;
     }
     _errorHandler(e){
-        debugger
         throw new Error(e.message + " (" + e.filename + ":" + e.lineno + ")");
     }
     _messageHandler(e){

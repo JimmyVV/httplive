@@ -22,34 +22,52 @@ export default class MuxController {
     }
     parse(chunkArray, type = "MS") {
         this._flvDemux.parse(chunkArray);
-        
+
         if (type === "IS") {
-            let {videoIS,
-                audioIS} = this._mp4Remux.generateIS();
+            let {
+                videoIS,
+                audioIS,
+                mediaInfo
+            } = this._mp4Remux.generateIS();
 
             return {
                 videoIS,
                 audioIS,
-                videoMime:this._flvDemux.videoMIME,
-                audioMime:this._flvDemux.audioMIME
+                mediaInfo,
+                videoMime: this._flvDemux.videoMIME,
+                audioMime: this._flvDemux.audioMIME
             }
         } else {
 
             // keep there is enough audio samples
 
-            if (this._audioTrack.samples.length >1 && (this._videoTrack.samples.length) >1 ) {
-                
-                let {audioMS,videoMS} = this._mp4Remux.generateMS();
-                
+            if (this._audioTrack.samples.length > 1 && this._videoTrack.samples.length > 1) {
+
+                let {
+                    audioMS,
+                    videoMS,
+                    videoTimebase,
+                    audioTimebase,
+                    diffTimebase,
+                    videoTimeStamp,
+                    audioTimeStamp,
+                } = this._mp4Remux.generateMS();
+
 
                 return {
-                    audioMS,videoMS
+                    audioMS,
+                    videoMS,
+                    videoTimebase,
+                    audioTimebase,
+                    diffTimebase,
+                    videoTimeStamp,
+                    audioTimeStamp,
                 }
-    
+
             }
 
             return {};
- 
+
         }
     }
 }
