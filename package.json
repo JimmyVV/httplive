@@ -1,7 +1,7 @@
 {
-  "name": "av.js",
-  "version": "0.0.1",
-  "description": "html5 DASH framework, easily implement and combine",
+  "name": "httplive",
+  "version": "0.0.2",
+  "description": "http-chunked for live, easily implement and combine",
   "main": "index.js",
   "scripts": {
     "start": "http-server . -c -1 & webpack  -w -p ",
