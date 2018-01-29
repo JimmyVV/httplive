@@ -25,17 +25,8 @@ import { debug } from 'util';
 const log = new Log('HTTPChunked');
 
 class HTTPChunked extends HeaderRead {
-    constructor(url = '', config) {
+    constructor(url = '', config = {}) {
         super();
-
-        let urlType = typeof url;
-
-        // replace the object
-        if (urlType === 'object') {
-            config = url;
-        } else if (urlType === 'string') {
-            this._url = url;
-        }
 
         this._browser = detect();
 
