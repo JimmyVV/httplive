@@ -5,12 +5,12 @@ import {RETRYURL,FETCHURL,InitialSeg,MediaSeg} from './lib/constants';
 import Log from 'lib/log';
 import Mitt from 'lib/mitt';
 
-const log = new Log("AVFLV");
+const log = new Log("HTTPLive");
 
 const INFO = 'info'; // send back some stream info, like video.heigth/width
 const SYNC = 'sync'; // provide some timeStamp and timebase of video/audio
 
-export default class AVFLV{
+export default class HTTPLive{
     constructor(params){
         this._worker = worker(require.resolve('./chunks.worker'));
 
