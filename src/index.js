@@ -31,10 +31,11 @@ export default class AVFLV {
 
         this._video = params.video;
         this._url = params.url;
+        this._request = params.request;
         this._mseOptions = params.mse;
 
 
-        this._httpChunked = new HTTPChunked(this._url);
+        this._httpChunked = new HTTPChunked(this._url,this._request);
         this._mse = new MSE(this._video, this._mseOptions);
         this._muxController = new MuxController();
 

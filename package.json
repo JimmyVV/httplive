@@ -16,13 +16,13 @@
     "strip-loader": "^0.1.2",
     "uglifyjs-webpack-plugin": "^0.4.6",
     "webpack": "^3.8.1",
-    "webpack-stream": "^4.0.0",
-    "webworkify-webpack": "^2.1.0"
+    "webpack-stream": "^4.0.0"
   },
   "author": "villainhr jimmytian jimmyvv",
   "license": "BSD",
   "dependencies": {
     "detect-browser": "^2.0.0",
-    "mitt": "^1.1.2"
+    "mitt": "^1.1.2",
+    "webworkify-webpack": "^2.1.0"
   }
 }

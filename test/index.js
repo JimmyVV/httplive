@@ -5,7 +5,10 @@ import { log } from 'util';
 let video = document.getElementById('videoTag');
 
 let flv = new HTTPLive({
-  video
+  video,
+  request:{
+    cors:"cors"
+  }
 });
 
 video.addEventListener('canplaythrough',()=>{

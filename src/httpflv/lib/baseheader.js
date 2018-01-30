@@ -6,6 +6,7 @@ import {
     CHUNKEDERR,
     CHUNKEDPROGRESS
 } from 'lib/constants';
+import { debug } from 'util';
 
 
 export default class BaseHeader{

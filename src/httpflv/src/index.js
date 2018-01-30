@@ -19,7 +19,9 @@ import MSChunked from '../lib/xhr-ms-chunked';
 import {
     detect
 } from 'detect-browser';
-import { debug } from 'util';
+import {
+    debug
+} from 'util';
 
 
 const log = new Log('HTTPChunked');
@@ -29,6 +31,15 @@ class HTTPChunked extends HeaderRead {
         super();
 
         this._browser = detect();
+
+
+        // replace the object
+        if (typeof url === 'object') {
+            config = url;
+        } else if (typeof url === 'string') {
+            this._url = url;
+        }
+
 
         switch (this._browser && this._browser.name) {
             case 'chrome':
@@ -157,7 +168,7 @@ class HTTPChunked extends HeaderRead {
                     }
                 });
 
-            }else{
+            } else {
                 // save MS info
                 this._MSArray.push({
                     buffer: tmpData.buffer,
@@ -177,13 +188,13 @@ class HTTPChunked extends HeaderRead {
 
         }
 
-         /**
+        /**
          * the type contain IS/MS:
          *      IS: initial Segment
          *      MS: media Segment
          * the server maybe return duplicated IS, like Header: scirpt + video + audio + video +....
          */
-        if(this._ISArray.length >= this._ISLength){
+        if (this._ISArray.length >= this._ISLength) {
             console.warn('get IS info !!!!!!!!!!');
             this._emitter.emit(CHUNKEDSTREAM, this._ISArray, 'IS');
 
@@ -191,13 +202,13 @@ class HTTPChunked extends HeaderRead {
         }
 
         // detect the arr is empty, then don't return
-        if (this._MSArray.length){
+        if (this._MSArray.length) {
 
             this._emitter.emit(CHUNKEDSTREAM, this._MSArray, 'MS');
 
             this._MSArray = [];
         }
-        
+
 
 
     }
