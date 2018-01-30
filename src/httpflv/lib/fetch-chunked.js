@@ -50,7 +50,7 @@ export default class FetchChunked extends BaseHeader {
 
         this._CANCEL = false;
         this._ERROR = false;
-        this._cors = config.cors || 'cors';
+
 
         this._reader;
         console.log("FETCH chunked");

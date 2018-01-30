@@ -15,8 +15,7 @@ export default class BaseHeader{
             withCredentials:true,
             timeout:0,
             retry: 1,
-            cors:true,
-            chunkResolve:function(){}
+            cors:"cors",
         },config);
 
         this._url;
@@ -24,19 +23,14 @@ export default class BaseHeader{
         this._len = 0;
 
         this._retry = this._config.retry;
-        this._cors = this._config.cors;
-        this._retryTimer;
+        this._timeout = this._config.timeout;
 
+        // the cross-origin header
+        this._cors = this._config.cors; // for fetch
+        this._withCredentials = this._config.withCredentials; // for xhr
+
+        
         this._emitter = new Mitt;
-    }
-    get withCredentials(){
-        return this._config.withCredentials;
-    }
-    get timeout(){
-        return this._config.timeout;
-    }
-    get reconnection(){
-        return this._config.reconnection;
     }
     addEventListener(name, fn) {
         switch (name) {

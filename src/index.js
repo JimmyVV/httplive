@@ -147,6 +147,22 @@ export default class AVFLV {
     on(...args) {
         this.addEventListener(...args);
     }
+    /**
+     * new API
+     */
+
+     /**
+      * check if the browser support MSE and canplay fmp4 video
+      */
+    static isSupported(){
+        return window.MediaSource &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.58A01E, mp4a.40.2"') &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.4D401E, mp4a.40.2"') &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.64001E, mp4a.40.2"')
+    }
+
+
 
 }
 

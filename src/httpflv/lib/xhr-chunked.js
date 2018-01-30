@@ -1,43 +1,42 @@
-/** 
- * for IE
- * 
- */
 import BaseHeader from './baseheader';
 import {
-    HTTPCANCEL,
-    CHUNKEDSTREAM,
     CHUNKEDEND,
     CHUNKEDERR,
     CHUNKEDPROGRESS
 } from 'lib/constants';
 
-class XHRMSChunked extends BaseHeader {
-    constructor(config) {
+class XHRChunked extends BaseHeader{
+    constructor(config){
         super(config);
 
+        this._responseType = config.responseType || 'arraybuffer';
     }
-    _init(url) {
+    send(url){
+        this._xhr && this.drop(); // if it is used, clear it
+
 
         const xhr = this._xhr = new XMLHttpRequest();
+
         this._url = url;
 
-        xhr.open('GET', url, true);
+        xhr.open('GET',url, true);
 
-        xhr.responseType = 'ms-stream';
+        xhr.responseType = this._responseType;
 
         xhr.onerror = this._onError.bind(this);
         xhr.onprogress = this._onProgress.bind(this);
 
         xhr.withCredentials = this.withCredentials;
-        xhr.timeout = this.timeout;
-
+        this.timeout && (xhr.timeout = this.timeout) ;
+        
         xhr.send();
     }
-    _onProgress(e) {
+
+    _onProgress(e){
         let chunk = this._xhr.response;
 
-        if (!chunk) {
-            console.error('the chunked buffer is null ', chunk);
+        if(!chunk){
+            console.error('the chunked buffer is null ',chunk);
         }
 
         super._emit(CHUNKEDPROGRESS, chunk.slice(this._len));
@@ -46,25 +45,23 @@ class XHRMSChunked extends BaseHeader {
 
     }
     _onError(e) {
-        clearTimeout(this._retryTimer);
+        // clearTimeout(this._retryTimer);
 
-        this._retryTimer = this._reconnect > 0 && setTimeout(() => {
-            this.retry();
-        }, 3000);
+        // this._retryTimer = this._reconnect > 0 && setTimeout(() => {
+        //     this.retry();
+        // }, 3000);
 
-        this._reconnect--; // only retry 
+        // this._reconnect--; // only retry 
 
         throw new Error(e);
     }
-    drop() {
+    drop(){
         this._xhr.abort();
     }
-    retry() {
-        this.drop();
+    retry(){
         this.send(this._url);
     }
-    replace(url) {
-        this.drop();
+    replace(url){
         this.send(url);
     }
 }
