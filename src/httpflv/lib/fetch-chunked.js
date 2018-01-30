@@ -126,6 +126,7 @@ export default class FetchChunked extends BaseHeader {
 
             console.error(err);
         });
+        
     }
     retry(url) {
         console.log('retry to connect the url,', this._url);
