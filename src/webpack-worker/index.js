@@ -1,6 +1,6 @@
 
 import worker from 'webworkify-webpack'
-import MSE from 'MSE/mseControl';
+import MSEController from 'MSE/mseControl';
 import {RETRYURL,FETCHURL,InitialSeg,MediaSeg} from './lib/constants';
 import Log from 'lib/log';
 import Mitt from 'lib/mitt';
@@ -17,7 +17,7 @@ export default class AVFLV{
         this._video = params.video;
         this._mseOptions = params.mse;
 
-        this._mse = new MSE(this._video, this._mseOptions);
+        this._mse = new MSEController(this._video, this._mseOptions);
 
         this._worker.addEventListener('message',this._messageHandler.bind(this));
         this._worker.addEventListener('error',this._errorHandler.bind(this));

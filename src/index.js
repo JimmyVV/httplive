@@ -1,18 +1,19 @@
 import HTTPChunked from 'httpflv/src';
 import MuxController from 'mux';
-import MSE from 'MSE/mseControl';
+import MSEController from 'MSE/mseControl';
 import Mitt from 'lib/mitt';
 import Log from 'lib/log';
+import CustomPlayer from 'lib/factory';
 
 const INFO = 'info'; // send back some stream info, like video.heigth/width
 const SYNC = 'sync'; // provide some timeStamp and timebase of video/audio
 
 
-const log = new Log("AVFLV");
+const log = new Log("HTTPLive");
 /**
  * no-worker version
  */
-export default class AVFLV {
+export default class HTTPLive {
     /**
      * the entry of av.js
      * @param {Object} params 
@@ -29,15 +30,22 @@ export default class AVFLV {
      */
     constructor(params) {
 
+        params = Object.assign({},params,{
+            HTTPChunked,
+            MSEController,
+            MuxController,
+        })
+
         this._video = params.video;
         this._url = params.url;
         this._request = params.request;
         this._mseOptions = params.mse;
 
+        // replace the modules
 
-        this._httpChunked = new HTTPChunked(this._url,this._request);
-        this._mse = new MSE(this._video, this._mseOptions);
-        this._muxController = new MuxController();
+        this._httpChunked = new params.HTTPChunked(this._url,this._request);
+        this._mse = new params.MSEController(this._video, this._mseOptions);
+        this._muxController = new params.MuxController();
 
         this._emitter = new Mitt;
 
@@ -170,5 +178,6 @@ export default class AVFLV {
 export {
     HTTPChunked,
     MuxController,
-    MSE,
+    MSEController,
+    CustomPlayer,
 }

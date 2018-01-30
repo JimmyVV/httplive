@@ -1,8 +1,12 @@
 // import HTTPLive from '../src/webpack-worker';
-import HTTPLive from '../src';
+import {CustomPlayer,HTTPChunked} from '../src';
 import { log } from 'util';
 
 let video = document.getElementById('videoTag');
+
+const HTTPLive = CustomPlayer({
+  HTTPChunked
+});
 
 let flv = new HTTPLive({
   video,

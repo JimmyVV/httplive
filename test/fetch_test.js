@@ -1,22 +1,41 @@
-function consume(reader) {
-    var total = 0
-    return pump()
-    function pump() {
-      return reader.read().then(({done, value}) => {
-        if (done) {
-          return
-        }
-        total += value.byteLength
-        log(`received ${value.byteLength} bytes (${total} bytes in total)`)
-        return pump()
-      })
-      .catch(err=>{
-          console.error(err);
-      })
-    }
+// import HTTPLive from '../src/webpack-worker';
+import {CustomPlayer} from '../src';
+import { log } from 'util';
+
+let video = document.getElementById('videoTag');
+
+const HTTPLive = CustomPlayer();
+
+
+let flv = new HTTPLive({
+  video,
+  request:{
+    cors:"cors"
   }
-  
-  fetch("http://6721.liveplay.myqcloud.com/live/6721_6e049448d227b9f2fb951a2a5f2ca3cb.flv")
-    .then(res => consume(res.body.getReader()))
-    .then(() => log("consumed the entire body without keeping the whole thing in memory!"))
-    .catch(e => log("something went wrong: " + e))
+});
+
+video.addEventListener('canplaythrough',()=>{
+  video.play();
+},false);
+
+video.addEventListener('error',e=>{
+  throw new Error(e);
+},false);
+
+
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_f8137a92b0438238aa971db5962bafd2.flv');
+
+flv.on('info',msg=>{
+  console.log('info',msg);
+})
+
+flv.on('sync',msg=>{
+  console.log('sync',msg);
+})
+
+
+
+setTimeout(() => {
+  // flv.player.retry();
+  // flv.player.replace('http://6721.liveplay.myqcloud.com/live/6721_02b476b9814b8442ff3bddd4dd64804e.flv');
+}, 2000);
