@@ -13,7 +13,7 @@ import Log from 'lib/log'
 
 import FetchChunked from '../lib/fetch-chunked';
 import MozChunked from '../lib/xhr-ff-chunked';
-import W3CChunked from '../lib/xhr-w3c-chunked';
+import W3CChunked from '../lib/xhr-chunked';
 import MSChunked from '../lib/xhr-ms-chunked';
 
 import {

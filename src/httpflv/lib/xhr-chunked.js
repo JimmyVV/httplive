@@ -5,7 +5,7 @@ import {
     CHUNKEDPROGRESS
 } from 'lib/constants';
 
-class XHRChunked extends BaseHeader{
+export default class XHRChunked extends BaseHeader{
     constructor(config){
         super(config);
 

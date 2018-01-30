@@ -17,7 +17,7 @@ video.addEventListener('error',e=>{
 },false);
 
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_6ad2056fa9cebeed4dffed9fcf6b98fe.flv');
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_f8137a92b0438238aa971db5962bafd2.flv');
 
 flv.on('info',msg=>{
   console.log('info',msg);
