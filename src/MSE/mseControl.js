@@ -9,7 +9,7 @@ export default class MSEControl {
         this._video = video;
         this._SUPPORT = this._detect();
         this._sbList = [];
-        this._options= options;
+        this._options= options; // when init a sourceBuffer, it will use this._options
 
         this._video.src = URL.createObjectURL(this._ms);
 
