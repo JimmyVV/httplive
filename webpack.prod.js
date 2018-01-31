@@ -8,7 +8,7 @@ let config = {
     context: path.join(__dirname),
     entry: {
         index: path.join(__dirname, 'src/index'),
-        "index-worker": path.join(__dirname, 'src/webpack-worker/index'),
+        "index.worker": path.join(__dirname, 'src/webpack-worker/index'),
     },
     output: {
         path: path.join(__dirname, 'dist'),
@@ -22,14 +22,15 @@ let config = {
     module: {
         rules: [{
             test: /\.(js|jsx)$/,
+            exclude: /node_modules/,
             use: [{
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015'],
+                    presets: ['es2015','stage-0'],
                     retainLines: true
                 }
             }]
-        }]
+        }],
     },
     plugins: [
         new Uglifyjs({

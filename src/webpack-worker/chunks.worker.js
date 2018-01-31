@@ -85,4 +85,6 @@ class WorkerController {
     }
 }
 
-new WorkerController();
+export default function(){
+    new WorkerController();
+}

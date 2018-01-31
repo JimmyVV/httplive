@@ -1,12 +1,13 @@
-// import HTTPLive from '../src/webpack-worker';
-import {CustomPlayer,HTTPChunked} from '../dist/index.min.js';
+import HTTPLive from '../dist/index.worker.min.js';
+// import HTTPLive from '../src/webpack-worker/index';
+// import {CustomPlayer,HTTPChunked} from '../dist/index.min.js';
 import { log } from 'util';
 
 let video = document.getElementById('videoTag');
 
-const HTTPLive = CustomPlayer({
-  HTTPChunked
-});
+// const HTTPLive = CustomPlayer({
+//   HTTPChunked
+// });
 
 let flv = new HTTPLive({
   video,
@@ -36,7 +37,7 @@ flv.on('sync',msg=>{
 
 
 
-setTimeout(() => {
-  // flv.player.retry();
-  // flv.player.replace('http://6721.liveplay.myqcloud.com/live/6721_02b476b9814b8442ff3bddd4dd64804e.flv');
-}, 2000);
+// setTimeout(() => {
+//   // flv.player.retry();
+//   // flv.player.replace('http://6721.liveplay.myqcloud.com/live/6721_02b476b9814b8442ff3bddd4dd64804e.flv');
+// }, 2000);

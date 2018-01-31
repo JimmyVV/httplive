@@ -12,7 +12,7 @@ const SYNC = 'sync'; // provide some timeStamp and timebase of video/audio
 
 export default class HTTPLive{
     constructor(params){
-        this._worker = worker(require.resolve('./chunks.worker'));
+        this._worker = worker(require('./chunks.worker'));
 
         this._video = params.video;
         this._mseOptions = params.mse;
