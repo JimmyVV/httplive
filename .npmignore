@@ -5,6 +5,9 @@ public
 todo.mindnode
 resource
 
+# For test
+index.html
+
 node_modules
 
 # npm-error
