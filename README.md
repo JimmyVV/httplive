@@ -63,7 +63,7 @@ Later, I will show you about the standard protocols of these modules.
 
 ## Contact
 
-If you are interested in MSE and live stream playback, 
+If you are interested in MSE and live stream playback, you can scan the QR_code and join us.
 
 ## Contributor
 
