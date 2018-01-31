@@ -1,3 +1,8 @@
+/**
+ * refered from https://github.com/Bilibili/flv.js/
+ * @author zheng qian <xqq@xqq.im>
+ */
+
 import ExpGolomb from './exp_golomb.js';
 
 class SPSParser {

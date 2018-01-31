@@ -1,4 +1,7 @@
-
+/**
+ * refered from https://github.com/Bilibili/flv.js/
+ * @author zheng qian <xqq@xqq.im>
+ */
 
 // Exponential-Golomb buffer decoder
 class ExpGolomb {
