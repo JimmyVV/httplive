@@ -136,5 +136,12 @@ export default class HTTPLive{
     on(...args) {
         this.addEventListener(...args);
     }
+    static isSupported(){
+        return window.MediaSource &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.42E01E, mp4a.40.2"') &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.58A01E, mp4a.40.2"') &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.4D401E, mp4a.40.2"') &&
+        MediaSource.isTypeSupported('video/mp4; codecs="avc1.64001E, mp4a.40.2"')
+    }
 }
 
