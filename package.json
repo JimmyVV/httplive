@@ -2,10 +2,11 @@
   "name": "httplive",
   "version": "0.0.2",
   "description": "http-chunked for live, easily implement and combine",
-  "main": "index.js",
+  "main": "dist/index.min.js",
   "scripts": {
-    "start": "http-server . -c -1 & webpack  -w -p ",
-    "release": "http-server . -c -1 & NODE_ENV=compile webpack -w"
+    "start": "http-server . -c -1 & webpack  --config webpack.dev.js -w -p ",
+    "build":"webpack --config webpack.prod.js --env production --progress --colors",
+    "debug":"webpack --config webpack.prod.js --env production --progress --colors --verbose"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

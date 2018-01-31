@@ -3,17 +3,14 @@ const webpack = require('webpack');
 const Uglifyjs = require('uglifyjs-webpack-plugin');
 
 
-const COMPILE = (process.env.NODE_ENV === 'compile');
-
 let config = {
     devtool: 'cheap-module-eval-source-map',
-    // devtool:'no-sourcem-map',
     context: path.join(__dirname),
     entry: {
         index: path.join(__dirname, 'test')
     },
     output: {
-        path: path.join(__dirname, 'dist'),
+        path: path.join(__dirname, 'public'),
         filename: '[name].js'
     },
     resolve: {
@@ -21,7 +18,7 @@ let config = {
     },
     module: {
         rules: [{
-            test: /((?!worker).)*\.(js|jsx)$/,
+            test: /\.(js|jsx)$/,
             use: [{
                 loader: 'babel-loader',
                 query: {
@@ -32,15 +29,6 @@ let config = {
         }]
     },
     plugins: []
-}
-
-if (COMPILE) {
-    config.plugins.push(new Uglifyjs({
-        compress: {
-            warnings: true,
-            pure_funcs:['console.log']
-        }
-    }));
 }
 
 

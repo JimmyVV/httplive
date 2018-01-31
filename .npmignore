@@ -1,9 +1,9 @@
 # Customize HTTPLive npmignore
 
-node_modules
-dist
+test
 public
-
+todo.mindnode
+resource
 
 # npm-error
 npm-debug.log

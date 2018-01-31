@@ -1,5 +1,5 @@
 // import HTTPLive from '../src/webpack-worker';
-import {CustomPlayer,HTTPChunked} from '../src';
+import {CustomPlayer,HTTPChunked} from '../dist/index.min.js';
 import { log } from 'util';
 
 let video = document.getElementById('videoTag');
@@ -24,14 +24,14 @@ video.addEventListener('error',e=>{
 },false);
 
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_f8137a92b0438238aa971db5962bafd2.flv');
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_d857900880ff24ea994d7bb3fa84e979.flv');
 
 flv.on('info',msg=>{
-  console.log('info',msg);
+  // console.log('info',msg);
 })
 
 flv.on('sync',msg=>{
-  console.log('sync',msg);
+  // console.log('sync',msg);
 })
 
 
