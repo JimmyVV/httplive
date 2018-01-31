@@ -1,5 +1,5 @@
 
-import worker from 'webworkify-webpack'
+import worker from 'lib/webworkify-webpack'
 import MSEController from 'MSE/mseControl';
 import {RETRYURL,FETCHURL,InitialSeg,MediaSeg} from './lib/constants';
 import Log from 'lib/log';
@@ -34,7 +34,7 @@ export default class HTTPLive{
     }
     _messageHandler(e){
         let {event} = e.data;
-
+        debugger
         switch(event){
             case InitialSeg:
                 this._appendIS(e.data);

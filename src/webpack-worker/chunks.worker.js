@@ -33,9 +33,9 @@ function WorkerController(self){
 
     function _chunkReader(stream,type){
         if (type === 'IS') {
-            this._appendIS(stream, type);
+            _appendIS(stream, type);
         } else {
-            this._appendMS(stream, type);
+            _appendMS(stream, type);
         }
     }
 
