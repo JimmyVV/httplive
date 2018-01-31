@@ -5,6 +5,8 @@ public
 todo.mindnode
 resource
 
+node_modules
+
 # npm-error
 npm-debug.log
 
