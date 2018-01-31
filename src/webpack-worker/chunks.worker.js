@@ -6,49 +6,47 @@ import {
     InitialSeg,
     MediaSeg
 } from './lib/constants';
-import {
-    debug
-} from 'util';
+import { debug } from 'util';
 
 
-class WorkerController {
-    constructor() {
-        this._httpChunked = new HTTPChunked();
-        this._muxController = new MuxController();
+function WorkerController(self){
+    let _httpChunked = new HTTPChunked();
+    let _muxController = new MuxController();
+    debugger
+    self.addEventListener('message', _messageHandler.bind(this));
+    _httpChunked.on('stream', _chunkReader.bind(this));
 
-
-        self.addEventListener('message', this._messageHandler.bind(this));
-        this._httpChunked.on('stream', this._chunkReader.bind(this));
-    }
-    _messageHandler(e) {
+    function _messageHandler (e)  {
         let {
             event
         } = e.data;
 
         switch (event) {
             case FETCHURL:
-                this._httpChunked.send(e.data.url);
+                _httpChunked.send(e.data.url);
                 break;
             case RETRYURL:
-                this._httpChunked.retry();
+                _httpChunked.retry();
                 break;
         }
     }
-    _chunkReader(stream, type) {
+
+    function _chunkReader(stream,type){
         if (type === 'IS') {
             this._appendIS(stream, type);
         } else {
             this._appendMS(stream, type);
         }
     }
-    _appendIS(stream, type) {
+
+    function _appendIS (stream, type) {
         let {
             videoIS,
             audioIS,
             videoMime,
             audioMime,
             mediaInfo,
-        } = this._muxController.parse(stream, type);
+        } = _muxController.parse(stream, type);
 
         self.postMessage({
             event: InitialSeg,
@@ -59,7 +57,7 @@ class WorkerController {
             mediaInfo,
         }, [videoIS.buffer, audioIS.buffer]);
     }
-    _appendMS(stream, type) {
+    function _appendMS (stream, type) {
         let {
             audioMS,
             videoMS,
@@ -68,7 +66,7 @@ class WorkerController {
             diffTimebase,
             videoTimeStamp,
             audioTimeStamp,
-        } = this._muxController.parse(stream, type);
+        } = _muxController.parse(stream, type);
 
 
 
@@ -83,8 +81,7 @@ class WorkerController {
             audioTimeStamp,
         }, [audioMS.buffer, videoMS.buffer]);
     }
+
 }
 
-export default function(){
-    new WorkerController();
-}
+export default WorkerController;

@@ -22,15 +22,13 @@ let config = {
     module: {
         rules: [{
             test: /\.(js|jsx)$/,
-            exclude: /node_modules/,
             use: [{
                 loader: 'babel-loader',
                 query: {
-                    presets: ['es2015','stage-0'],
-                    retainLines: true
+                    presets: ['es2015'],
                 }
             }]
-        }],
+        }]
     },
     plugins: [
         new Uglifyjs({

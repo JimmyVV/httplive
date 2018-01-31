@@ -29,6 +29,7 @@ flv.send('http://6721.liveplay.myqcloud.com/live/6721_d857900880ff24ea994d7bb3fa
 
 flv.on('info',msg=>{
   // console.log('info',msg);
+  
 })
 
 flv.on('sync',msg=>{

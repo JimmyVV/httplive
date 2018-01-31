@@ -6,7 +6,7 @@
   "scripts": {
     "start": "http-server . -c -1 & webpack  --config webpack.dev.js -w -p ",
     "build":"webpack --config webpack.prod.js --env production --progress --colors",
-    "debug":"webpack --config webpack.prod.js --env production --progress --colors --verbose"
+    "debug":"webpack --config webpack.prod.js -w --env production --progress --colors --verbose"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
