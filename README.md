@@ -61,14 +61,15 @@ Later, I will show you about the standard protocols of these modules.
 
 ## API
 
+
+
 ## Contact
 
 If you are interested in MSE and live stream playback, you can scan the QR_code and join us.
 
-## Contributor
+![wechat](http://villainhr-1252111119.file.myqcloud.com/qrcode_for_gh_ac06a91faa8b_344.jpg)
 
-
-
+Then, replay `MSE`, you can get a group QR_code. Scan it and Welcome.
 
 
 ## LICENSE

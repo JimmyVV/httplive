@@ -1,6 +1,4 @@
-In order to reduce the size, httplive provides you two min.js, one is using webworker, the other is not.
-
-If you are using webpack as a build tool, you can simply switch between them.
+In order to reduce the size, httplive provides you two min.js, one is using webworker, the other is not.If you are using webpack as a building tool, you can simply switch between them.
 
 ```
 resolve:{
@@ -13,7 +11,7 @@ resolve:{
 
 And, their interface is the same.
 
-### httplive
+## httplive
 
 ```
 import HTTPLive from 'httplive';
@@ -62,7 +60,7 @@ let flv = new HTTPLive({
         video
     });
 
-// if you wanna pass some params,you can use:
+// For better experience, you can cancel the keepUpdated operation.
 
 let flv = new HTTPLive({
     video,
@@ -97,3 +95,68 @@ enum event{
  - retry(): provide you a way to retry the connection.
  - on/bind/addEventListener(): just add some listener to get some valuable messages.
  - isSupported: check if the browser support MSE.
+
+### Event
+
+Httplive provide two events for you, `sync` and `info`. You can get the Initialization Info and  palyback info about A/V sync.
+
+```
+flv.on('info',msg=>{
+    window.__report({
+        mediaInfo
+        videoMime
+        audioMime
+    });
+  
+    window.__report("The video size, width: " + mediaInfo.width + " height: " + mediaInfo.height);
+})
+
+flv.on('sync',msg=>{
+    let {diffTimebase,audioTimebase,videoTimeStamp} = msg;
+    
+    if(diffTimebase > 100){
+        // videoTime is 100ms faster than audio
+    }else{
+        // A/V is sync
+    }
+})
+```
+
+The `info` detail is :
+
+```
+Event info{
+    attribute Object mediaInfo；
+    attribute String videoMime;
+    attribute String audioMime;
+}
+
+Object mediaInfo{
+    attribute Number audiocodecid:
+    attribute Number audiodatarate
+    attribute Number audiosamplerate
+    attribute Number audiosamplesize
+    attribute Number duration
+    attribute String encoder
+    attribute Number filesize
+    attribute Number height
+    attribute Boolean stereo
+    attribute Number videocodecid
+    attribute Number videodatarate
+    attribute Number width
+    attribute Boolean hasVideo
+    attribute Boolean hasAudio
+}
+```
+
+the `sync` deatil is:
+
+```
+Event sync{
+        attribute Number videoTimebase;
+        attribute Number audioTimebase;
+        attribute Number diffTimebase;
+        attribute Number videoTimeStamp;
+        attribute Number audioTimeStamp;
+}
+```
