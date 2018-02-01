@@ -15,6 +15,10 @@ When the MSE technology is accepted by most of browser, front-end developers can
 > httplive is not a library, but a standards of front-end live stream playback
 
 
+## Languages
+
+中文版请参考：[readme_cn.md](./readme_cn.md)
+
 ## Features
 
  - Customization
