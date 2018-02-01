@@ -17,7 +17,7 @@ When the MSE technology is accepted by most of browser, front-end developers can
 
 ## Languages
 
-中文版请参考：[readme_cn.md](./readme_cn.md)
+中文版请参考：[readme_cn.md](./README_cn.md)
 
 ## Features
 
