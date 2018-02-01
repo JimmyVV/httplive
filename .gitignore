@@ -4,6 +4,7 @@ node_modules
 dist
 public
 todo.mindnode
+resource
 
 # npm-error
 npm-debug.log
