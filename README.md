@@ -61,7 +61,9 @@ Later, I will show you about the standard protocols of these modules.
 
 ## API
 
+[api.md](./docs)
 
+You can reference more detailed document to [wiki](https://github.com/JimmyVV/httplive/wiki/Get-Started);
 
 ## Contact
 
