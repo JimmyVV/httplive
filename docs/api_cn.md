@@ -1,4 +1,4 @@
-In order to reduce the size, httplive provides you two min.js, one is using webworker, the other is not.If you are using webpack as a building tool, you can simply switch between them.
+考虑到使用场景的不同，`httplive` 提供两个完整的 `min.js`。一个是针对于 webworker，另外一个是直接在 Document 上运行。如果你项目的构建工具是 webpack，你可以很容易的替换两者。
 
 ```
 resolve:{
@@ -9,7 +9,7 @@ resolve:{
 }
 ```
 
-Otherwise, you can import them by path:
+或者，你可以通过路径来区分引用：
 
 ```
 // no-worker
@@ -19,17 +19,15 @@ import HTTPLive from 'httplive';
 import HTTPLive from 'httplive/dist/index.worker.min';
 ```
 
-And, no matter which one you import, their interface is the same.
+不管你引入哪一个，它们的接口都是一样的：
 
-## Import
+## 调用
 
 ```
 import HTTPLive from 'httplive';
 ```
 
-### Construtor
-
-Its constructor is:
+### 构造函数
 
 ```
 [Constructor]
@@ -52,17 +50,17 @@ Object mse{
 }
 ```
 
-For above params, only the video is necessary. 
+上面的入参中，只有 `video` 是必须的。
 
- - video: The video element you want to bind with [MSE](https://www.w3.org/TR/media-source/#).
- - url: the link of live video
- - mse: some params to control the MSE
-    - maxBufferTime: the maximum playing time to remove timeRanges
-    - keepUpdated: indicate to catch up time when the video time behind the ranges.end(0)
-    - trailedTime: the maximum delay time of video behind the ranges.end(0), otherwise, the play will use fast forward to catch up live time. 
-    - playbackRate: the fast forward rate when to catch up time.
+ - video: 你与 [MSE](https://www.w3.org/TR/media-source/#) 绑定的 video 元素
+ - url: 直播链接，其能够提供 chunked 的长连接协议.
+ - mse: 用来控制 MSE 播放的参数
+    - maxBufferTime: timeRanges 最大的清除时间
+    - keepUpdated: 当 video 的播放时间晚于 ranges.end(0) 时，是否开启追帧策略(变速播放)
+    - trailedTime: video 播放时间落后与 ranges.end(0) 的最大范围值
+    - playbackRate: 追帧策略的变速比例
 
-For better experience, you can canel the `keepUpdated` operation.
+如果为了更好的体验，你可以取消追帧策略。
 
 ```
 let video = document.getElementById('video');
@@ -79,7 +77,7 @@ let flv = new HTTPLive({
 ```
 
 
-### Initialization
+### 实例返回
 
 ```
 [Return]
@@ -99,14 +97,17 @@ enum event{
 }
 ```
 
- - send(url): when you start to recevice the live video chunk, you can call this fn. but remember that, you can only trigger this fn once.
- - retry(): provide you a way to retry the connection.
- - on/bind/addEventListener(): just add some listener to get some valuable messages.
- - isSupported: check if the browser support MSE.
 
-### Event
+ - send(url): 当开始播放直播流时，可以调用该方法。不过，你只能调用一次。
+ - retry(): 提供重试操作。
+ - on/bind/addEventListener(): 监听事件方法。
+ - isSupported(): 检查你的浏览器，是否能正常播放直播流。 
 
-Httplive provide two events for you, `sync` and `info`. You can get the Initialization Info and  palyback info about A/V sync.
+
+### 事件
+
+
+Httplive 提供了 `sync` 和 `info` 两个事件。你可以得到直播流的 Initialization 信息和 A/V 同步的播放信息。
 
 ```
 flv.on('info',msg=>{
@@ -130,7 +131,7 @@ flv.on('sync',msg=>{
 })
 ```
 
-The `info` detail is :
+`info` 事件的内容有：
 
 ```
 Event info{
@@ -157,7 +158,7 @@ Object mediaInfo{
 }
 ```
 
-the `sync` deatil is:
+`sync` 事件的内容有：
 
 ```
 Event sync{

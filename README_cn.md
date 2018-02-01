@@ -73,7 +73,7 @@ let flv = new HTTPLive({
 
 [api.md](./docs)
 
-更详细的文档，可以参考 [wiki](https://github.com/JimmyVV/httplive/wiki/Get-Started);
+<!-- 更详细的文档，可以参考 [wiki](https://github.com/JimmyVV/httplive/wiki/Get-Started); -->
 
 ## 联系
 
