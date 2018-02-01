@@ -22,7 +22,7 @@ When the MSE technology is accepted by most of browser, front-end developers can
  - High effective A/V sync algorithm
  - Easily
  
- ## Install
+## Install
 
 ```
 npm install httplive --save
