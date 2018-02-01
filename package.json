@@ -1,6 +1,6 @@
 {
   "name": "httplive",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "http-chunked for live, easily implement and combine",
   "main": "dist/index.min.js",
   "scripts": {
