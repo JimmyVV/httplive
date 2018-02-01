@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://github.com/JimmyVV/httplive">
-    <img width="300" heigth="300" src="http://villainhr-1252111119.file.myqcloud.com/create_thumb.png">
+    <img width="300" heigth="300" src="http://villainhr-1252111119.file.myqcloud.com/Screen%20Shot%202018-02-01%20at%201.13.35%20PM.png">
   </a>
   <br>
   <br>
@@ -65,7 +65,7 @@ let flv = new HTTPLive({
 
 ```
 
-Later, I will show you about the standard protocols of these modules. 
+Later, I will show you about the standard protocols of these modules in wiki.
 
 ## API
 
@@ -75,11 +75,19 @@ You can reference more detailed document to [wiki](https://github.com/JimmyVV/ht
 
 ## Contact
 
-If you are interested in MSE and live stream playback, you can scan the QR_code and join us.
+If you are interested in MSE and live stream playback, you can scan the QR_code and join us in wechat. 
 
 ![wechat](http://villainhr-1252111119.file.myqcloud.com/qrcode_for_gh_ac06a91faa8b_344.jpg)
 
 Then, replay `MSE`, you can get a group QR_code. Scan it and Welcome.
+
+For these people who don't have a wechat account,you can send me a [email](mailto:villainthr@gmail.com) and keep contact.
+
+ - villainthr@gmail.com
+
+
+When you meet some problem about httplive, you can show us [issue](https://github.com/JimmyVV/httplive/issues/new). Httplive is an open-source repo,so we welcome people to check and optimze it and contribute your [PR](https://github.com/JimmyVV/httplive/pulls)
+
 
 
 ## LICENSE
