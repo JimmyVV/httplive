@@ -60,7 +60,7 @@ playBtn.addEventListener('click', e => {
 
     connectLive = false;
   }else{
-    alert('请输入连接');
+    alert('请输入链接');
   }
 
 
