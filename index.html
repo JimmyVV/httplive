@@ -1,24 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>http-flv</title>
     <style>
-        .play-button{
-            width:6em;
-            height: 30px;
-            border: 1px solid black;
+        body,html{
+            width:100%; 
+        }
+        .play-button {
+            display: inline-block;
+            background-image: -webkit-linear-gradient(10deg,#6fcdff,#9afff5);
+            background-image: linear-gradient(80deg,#6fcdff,#9afff5);
+            width: 200px;
+            margin-top: 20px;
+            height: 38px;
+            border-radius: 20px;
+            cursor: pointer;
+            outline: 0;
+            border: 0;
+            font-size: 18px;
+            line-height: 1;
+            color: #2f3f51;
+            font-weight: 500;
+
+        }
+
+        .http-url {
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            padding-left: 8px;
+            font-size: 16px;
+            width: 280px;
+            height: 50px;
+            border-radius: 2px;
+            border: solid 1px #979797;
+            margin-top: 15px;
+            -webkit-box-shadow: none;
+            box-shadow: none;
+        }
+        .video-player{
+            margin:20px;
+            width: 80%;
+            max-width: 680px;
         }
     </style>
 </head>
-<body>
-    <video src="" id="videoTag" no-controls autoplay ></video>
-    
-    <br/>
 
+<body>
+    <input type="text" id="httpUrl" placeholder="直播链接" class="http-url" /> 
+    <br />
     <button class="play-button" id="start-player">Start</button>
+    <br />
+    <video src="" id="videoTag" class="video-player" webkit-playsinline no-controls playsinline></video>
+
+    <br />
+
+    
     <script src="public/index.js"></script>
 </body>
+
 </html>
