@@ -53,7 +53,6 @@ export default class FetchChunked extends BaseHeader {
 
 
         this._reader;
-        console.log("FETCH chunked");
     }
     send(url) {
         this._url = url;

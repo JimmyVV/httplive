@@ -1,7 +1,9 @@
 import HTTPLive from '../dist/index.min.js';
 // import HTTPLive from '../src/webpack-worker/index';
 // import {CustomPlayer,HTTPChunked} from '../dist/index.min.js';
-import { log } from 'util';
+import {
+  log
+} from 'util';
 
 let video = document.getElementById('videoTag');
 
@@ -11,29 +13,58 @@ let video = document.getElementById('videoTag');
 
 let flv = new HTTPLive({
   video,
-  request:{
-    cors:"cors"
+  request: {
+    cors: "cors"
   }
 });
 
-video.addEventListener('canplaythrough',()=>{
-  video.play();
-},false);
-
-video.addEventListener('error',e=>{
+video.addEventListener('error', e => {
   throw new Error(e);
-},false);
+}, false);
 
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_68848824e5e6b40bcd7246eaaa0f305b.flv');
 
-flv.on('info',msg=>{
-  // console.log('info',msg); 
-  
+
+flv.on('info', msg => {
+  // console.log('info',msg);
+
 })
 
-flv.on('sync',msg=>{
+flv.on('sync', msg => {
   // console.log('sync',msg);
 })
 
+let playBtn = document.getElementById('start-player');
 
+let inputText = document.getElementById('httpUrl');
+
+var httpUrl;
+
+inputText.addEventListener('change', e => {
+  httpUrl = e.target.value;
+})
+
+
+let connectLive = true;
+
+playBtn.addEventListener('click', e => {
+
+
+  if (httpUrl) {
+
+    connectLive && (() => {
+      flv.send(httpUrl);
+      video.play();
+
+    })();
+
+    connectLive = false;
+  }else{
+    alert('请输入连接');
+  }
+
+<<<<<<< HEAD
+=======
+
+}, false);
+>>>>>>> 8af19993045aff89f0e1d5b35782eeca75898be5
