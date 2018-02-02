@@ -63,8 +63,5 @@ playBtn.addEventListener('click', e => {
     alert('请输入连接');
   }
 
-<<<<<<< HEAD
-=======
 
 }, false);
->>>>>>> 8af19993045aff89f0e1d5b35782eeca75898be5
