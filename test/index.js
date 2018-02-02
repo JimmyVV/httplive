@@ -1,4 +1,4 @@
-import HTTPLive from '../dist/index.worker.min.js';
+import HTTPLive from '../dist/index.min.js';
 // import HTTPLive from '../src/webpack-worker/index';
 // import {CustomPlayer,HTTPChunked} from '../dist/index.min.js';
 import { log } from 'util';
@@ -25,10 +25,10 @@ video.addEventListener('error',e=>{
 },false);
 
 
-flv.send('http://6721.liveplay.myqcloud.com/live/6721_b7056ff4b595a8675cd73a9a11ab653e.flv');
+flv.send('http://6721.liveplay.myqcloud.com/live/6721_68848824e5e6b40bcd7246eaaa0f305b.flv');
 
 flv.on('info',msg=>{
-  // console.log('info',msg);
+  // console.log('info',msg); 
   
 })
 
@@ -37,8 +37,3 @@ flv.on('sync',msg=>{
 })
 
 
-
-// setTimeout(() => {
-//   // flv.player.retry();
-//   // flv.player.replace('http://6721.liveplay.myqcloud.com/live/6721_02b476b9814b8442ff3bddd4dd64804e.flv');
-// }, 2000);
