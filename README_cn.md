@@ -15,6 +15,9 @@
 
 > httplive 并不是库，它只是一套前端直播流的规范。
 
+## DEMO
+
+[HTTPLive demo](https://jimmyvv.github.io/live/index.html)
 
 ## 特性
 
