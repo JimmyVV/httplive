@@ -37,8 +37,3 @@ flv.on('sync',msg=>{
 })
 
 
-
-// setTimeout(() => {
-//   // flv.player.retry();
-//   // flv.player.replace('http://6721.liveplay.myqcloud.com/live/6721_02b476b9814b8442ff3bddd4dd64804e.flv');
-// }, 2000);
