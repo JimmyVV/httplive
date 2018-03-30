@@ -87,6 +87,7 @@ If you are interested in MSE and live stream playback, you can scan the QR_code 
 
 ![QR_code](http://static.zybuluo.com/jimmythr/vxf6vhvlo7lph7xgkbpm4nrt/image.png)
 
+After you scan it, you will receive a question and its answer is `MSE` 
 
 For these people who don't have a QQ account,you can send me a [email](mailto:villainthr@gmail.com) and keep contact.
 

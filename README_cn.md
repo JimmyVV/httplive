@@ -84,6 +84,7 @@ let flv = new HTTPLive({
 
 ![QR_code](http://static.zybuluo.com/jimmythr/vxf6vhvlo7lph7xgkbpm4nrt/image.png)
 
+加群之后，需要回答一个问题，答案是：MSE
 
 对于没有QQ的开发者，可以直接发送 [email](mailto:villainthr@gmail.com) ，相互学习。
 
