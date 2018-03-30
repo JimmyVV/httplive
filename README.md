@@ -83,13 +83,12 @@ Later, I will show you about the standard protocols of these modules in wiki.
 
 ## Contact
 
-If you are interested in MSE and live stream playback, you can scan the QR_code and join us in wechat. 
+If you are interested in MSE and live stream playback, you can scan the QR_code and join us in QQ. 
 
-![wechat](http://villainhr-1252111119.file.myqcloud.com/qrcode_for_gh_ac06a91faa8b_344.jpg)
+![QR_code](http://static.zybuluo.com/jimmythr/vxf6vhvlo7lph7xgkbpm4nrt/image.png)
 
-Then, replay `MSE`, you can get a group QR_code. Scan it and Welcome.
 
-For these people who don't have a wechat account,you can send me a [email](mailto:villainthr@gmail.com) and keep contact.
+For these people who don't have a QQ account,you can send me a [email](mailto:villainthr@gmail.com) and keep contact.
 
  - villainthr@gmail.com
 

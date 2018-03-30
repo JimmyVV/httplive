@@ -80,13 +80,12 @@ let flv = new HTTPLive({
 
 ## 联系
 
-如果你对前端 MSE 开发和直播开发感兴趣，可以用微信扫描下面的二维码加入我们。
+如果你对前端 MSE 开发和直播开发感兴趣，可以用扫描下面的二维码加入我们。
 
-![wechat](http://villainhr-1252111119.file.myqcloud.com/qrcode_for_gh_ac06a91faa8b_344.jpg)
+![QR_code](http://static.zybuluo.com/jimmythr/vxf6vhvlo7lph7xgkbpm4nrt/image.png)
 
-回复 `MSE`，你会得到另外一个最新 group QR_code，扫描并加入我们吧。
 
-对于没有微信的开发者，可以直接发送 [email](mailto:villainthr@gmail.com) ，相互学习。
+对于没有QQ的开发者，可以直接发送 [email](mailto:villainthr@gmail.com) ，相互学习。
 
  - villainthr@gmail.com
 
