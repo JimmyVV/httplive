@@ -100,7 +100,3 @@ When you meet some problem about httplive, you can show us [issue](https://githu
 ## LICENSE
 
 httplive is under the Apache License. See the LICENSE file for details. 
-
-
-
-
